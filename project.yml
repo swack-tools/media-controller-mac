@@ -33,7 +33,7 @@ targets:
           CODE_SIGN_STYLE: Manual
           ENABLE_HARDENED_RUNTIME: NO
         Release:
-          CODE_SIGN_STYLE: Automatic
+          CODE_SIGN_STYLE: Manual
           ENABLE_HARDENED_RUNTIME: YES
     scheme:
       testTargets: []

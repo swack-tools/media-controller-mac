@@ -41,7 +41,8 @@ test-verbose:
 release: generate
     xcodebuild -project MediaControl.xcodeproj -scheme MediaControl \
       -configuration Release -derivedDataPath build \
-      DEVELOPMENT_TEAM="${DEVELOPMENT_TEAM:-}"
+      DEVELOPMENT_TEAM="${DEVELOPMENT_TEAM:-}" \
+      CODE_SIGN_IDENTITY="Developer ID Application"
 
 # Archive for distribution (requires signing)
 archive: generate
