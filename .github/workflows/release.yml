@@ -57,6 +57,8 @@ jobs:
           just test
 
       - name: Build release
+        env:
+          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
         run: |
           just release
 
