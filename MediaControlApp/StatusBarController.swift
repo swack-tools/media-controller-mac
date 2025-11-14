@@ -1,0 +1,525 @@
+import Cocoa
+import Carbon
+import ServiceManagement
+import ShieldClient
+import OnkyoClient
+
+class StatusBarController: NSObject {
+    private var statusItem: NSStatusItem!
+    private var menu: NSMenu!
+    private var volumeSlider: NSSlider!
+    private var volumeLabel: NSMenuItem!
+    private var muteItem: NSMenuItem!
+    private var launchAtLoginItem: NSMenuItem!
+    private var eventTap: CFMachPort?
+
+    private let settings = SettingsManager.shared
+
+    // MARK: - Initialization
+
+    override init() {
+        super.init()
+        NSLog("StatusBarController: Initializing...")
+        setupMenuBar()
+        NSLog("StatusBarController: Menu bar setup complete")
+        setupGlobalHotkeys()
+        NSLog("StatusBarController: Global hotkeys setup complete")
+    }
+
+    func cleanup() {
+        if let eventTap = eventTap {
+            CGEvent.tapEnable(tap: eventTap, enable: false)
+            CFMachPortInvalidate(eventTap)
+        }
+    }
+
+    // MARK: - Menu Bar Setup
+
+    private func setupMenuBar() {
+        NSLog("StatusBarController: Creating status item...")
+
+        // Create status item
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        NSLog("StatusBarController: Status item created: %@", statusItem != nil ? "YES" : "NO")
+
+        if let button = statusItem.button {
+            NSLog("StatusBarController: Setting up button...")
+
+            // Use SF Symbol if available (macOS 11+), otherwise use text
+            if #available(macOS 11.0, *) {
+                let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .regular)
+                button.image = NSImage(systemSymbolName: "speaker.wave.2.fill", accessibilityDescription: "MediaControl")?.withSymbolConfiguration(config)
+                NSLog("StatusBarController: Set SF Symbol image: %@", button.image != nil ? "YES" : "NO")
+            }
+
+            // Fallback to text if image didn't load
+            if button.image == nil {
+                button.title = "🔊"
+                NSLog("StatusBarController: Using emoji fallback")
+            }
+        } else {
+            NSLog("StatusBarController: ERROR - No button available!")
+        }
+
+        // Create menu
+        NSLog("StatusBarController: Creating menu...")
+        menu = NSMenu()
+
+        // Shield TV section
+        menu.addItem(NSMenuItem.sectionHeader(title: "Shield TV"))
+
+        let playPauseItem = NSMenuItem(title: "⏯ Play/Pause", action: #selector(shieldPlayPause), keyEquivalent: "")
+        playPauseItem.target = self
+        menu.addItem(playPauseItem)
+
+        let configShieldItem = NSMenuItem(title: "Configure Shield IP...", action: #selector(configureShieldIP), keyEquivalent: "")
+        configShieldItem.target = self
+        menu.addItem(configShieldItem)
+
+        let pairItem = NSMenuItem(title: "Pair Shield TV...", action: #selector(pairShield), keyEquivalent: "")
+        pairItem.target = self
+        menu.addItem(pairItem)
+
+        // Separator
+        menu.addItem(NSMenuItem.separator())
+
+        // Receiver section
+        menu.addItem(NSMenuItem.sectionHeader(title: "Receiver"))
+
+        // Volume label
+        volumeLabel = NSMenuItem(title: "Volume: --", action: nil, keyEquivalent: "")
+        volumeLabel.isEnabled = false
+        menu.addItem(volumeLabel)
+
+        // Volume slider
+        setupVolumeSlider()
+
+        let volumeUpItem = NSMenuItem(title: "Volume Up (+5)", action: #selector(volumeUp), keyEquivalent: "")
+        volumeUpItem.target = self
+        menu.addItem(volumeUpItem)
+
+        let volumeDownItem = NSMenuItem(title: "Volume Down (-5)", action: #selector(volumeDown), keyEquivalent: "")
+        volumeDownItem.target = self
+        menu.addItem(volumeDownItem)
+
+        muteItem = NSMenuItem(title: "🔇 Mute", action: #selector(toggleMute), keyEquivalent: "")
+        muteItem.target = self
+        menu.addItem(muteItem)
+
+        // Separator
+        menu.addItem(NSMenuItem.separator())
+
+        let configReceiverItem = NSMenuItem(title: "Configure Receiver IP...", action: #selector(configureReceiverIP), keyEquivalent: "")
+        configReceiverItem.target = self
+        menu.addItem(configReceiverItem)
+
+        // Launch at login
+        launchAtLoginItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
+        launchAtLoginItem.target = self
+        menu.addItem(launchAtLoginItem)
+        updateLaunchAtLoginItem()
+
+        // Separator
+        menu.addItem(NSMenuItem.separator())
+
+        let aboutItem = NSMenuItem(title: "About MediaControl", action: #selector(showAbout), keyEquivalent: "")
+        aboutItem.target = self
+        menu.addItem(aboutItem)
+
+        let quitItem = NSMenuItem(title: "Quit MediaControl", action: #selector(quit), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
+
+        NSLog("StatusBarController: Assigning menu to status item...")
+        statusItem.menu = menu
+        NSLog("StatusBarController: Menu assigned. Item count: %d", menu.items.count)
+
+        // Set menu delegate to update volume on open
+        menu.delegate = self
+        NSLog("StatusBarController: Setup complete!")
+    }
+
+    private func setupVolumeSlider() {
+        let sliderView = NSView(frame: NSRect(x: 0, y: 0, width: 240, height: 30))
+
+        volumeSlider = NSSlider(value: 50, minValue: 0, maxValue: 100, target: self, action: #selector(volumeSliderChanged))
+        volumeSlider.frame = NSRect(x: 20, y: 5, width: 200, height: 20)
+
+        sliderView.addSubview(volumeSlider)
+
+        let sliderItem = NSMenuItem()
+        sliderItem.view = sliderView
+        menu.addItem(sliderItem)
+    }
+
+    // MARK: - Shield TV Actions
+
+    @objc private func shieldPlayPause() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.playPause()
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc private func configureShieldIP() {
+        let alert = NSAlert()
+        alert.messageText = "Configure Shield TV"
+        alert.informativeText = "Enter the IP address of your Shield TV"
+        alert.alertStyle = .informational
+
+        let inputField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+        inputField.stringValue = settings.shieldIP ?? ""
+        inputField.placeholderString = "192.168.1.100"
+        alert.accessoryView = inputField
+
+        alert.addButton(withTitle: "Save")
+        alert.addButton(withTitle: "Cancel")
+
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            let ip = inputField.stringValue.trimmingCharacters(in: .whitespaces)
+            if Validators.isValidIPAddress(ip) {
+                settings.shieldIP = ip
+                NotificationManager.shared.showSuccess(device: "Shield TV", message: "IP saved")
+            } else {
+                NotificationManager.shared.showError(device: "Shield TV", message: "Invalid IP address")
+            }
+        }
+    }
+
+    @objc private func pairShield() {
+        // First, ensure IP is configured
+        guard let ip = settings.shieldIP else {
+            NotificationManager.shared.showError(device: "Shield TV", message: "Configure IP first")
+            return
+        }
+
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+
+                // Start pairing with callback for PIN
+                try await client.pair {
+                    // This callback is called when PIN appears on TV
+                    // We need to show the PIN dialog on main thread and wait for user input
+                    return try await withCheckedThrowingContinuation { continuation in
+                        DispatchQueue.main.async {
+                            let alert = NSAlert()
+                            alert.messageText = "Enter Pairing PIN"
+                            alert.informativeText = "A 6-character PIN should now be displayed on your Shield TV.\nEnter it below:"
+                            alert.alertStyle = .informational
+
+                            let inputField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+                            inputField.placeholderString = "ABC123"
+                            alert.accessoryView = inputField
+
+                            alert.addButton(withTitle: "Pair")
+                            alert.addButton(withTitle: "Cancel")
+
+                            let response = alert.runModal()
+                            if response == .alertFirstButtonReturn {
+                                let pin = inputField.stringValue.trimmingCharacters(in: .whitespaces).uppercased()
+                                continuation.resume(returning: pin)
+                            } else {
+                                continuation.resume(throwing: NSError(domain: "PairingCancelled", code: -1, userInfo: [NSLocalizedDescriptionKey: "Pairing cancelled by user"]))
+                            }
+                        }
+                    }
+                }
+
+                NotificationManager.shared.showSuccess(device: "Shield TV", message: "Paired successfully!")
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
+    // MARK: - Receiver Actions
+
+    @objc private func volumeUp() {
+        Task {
+            do {
+                guard let client = settings.onkyoClient else {
+                    NotificationManager.shared.showError(device: "Receiver", message: "Not configured")
+                    return
+                }
+                try await client.volumeUp()
+                updateVolumeDisplay()
+            } catch {
+                NotificationManager.shared.showError(device: "Receiver", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc private func volumeDown() {
+        Task {
+            do {
+                guard let client = settings.onkyoClient else {
+                    NotificationManager.shared.showError(device: "Receiver", message: "Not configured")
+                    return
+                }
+                try await client.volumeDown()
+                updateVolumeDisplay()
+            } catch {
+                NotificationManager.shared.showError(device: "Receiver", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc private func toggleMute() {
+        Task {
+            do {
+                guard let client = settings.onkyoClient else {
+                    NotificationManager.shared.showError(device: "Receiver", message: "Not configured")
+                    return
+                }
+                try await client.toggleMute()
+            } catch {
+                NotificationManager.shared.showError(device: "Receiver", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc private func volumeSliderChanged() {
+        let volume = Int(volumeSlider.doubleValue)
+        volumeLabel.title = "Volume: \(volume)"
+
+        Task {
+            do {
+                guard let client = settings.onkyoClient else { return }
+                try await client.setVolume(volume)
+            } catch {
+                NotificationManager.shared.showError(device: "Receiver", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc private func configureReceiverIP() {
+        let alert = NSAlert()
+        alert.messageText = "Configure Receiver"
+        alert.informativeText = "Enter the IP address of your Onkyo/Integra receiver"
+        alert.alertStyle = .informational
+
+        let inputField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+        inputField.stringValue = settings.receiverIP ?? ""
+        inputField.placeholderString = "192.168.1.50"
+        alert.accessoryView = inputField
+
+        alert.addButton(withTitle: "Save")
+        alert.addButton(withTitle: "Cancel")
+
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            let ip = inputField.stringValue.trimmingCharacters(in: .whitespaces)
+            if Validators.isValidIPAddress(ip) {
+                settings.receiverIP = ip
+                NotificationManager.shared.showSuccess(device: "Receiver", message: "IP saved")
+                updateVolumeDisplay()
+            } else {
+                NotificationManager.shared.showError(device: "Receiver", message: "Invalid IP address")
+            }
+        }
+    }
+
+    private func updateVolumeDisplay() {
+        Task {
+            do {
+                guard let client = settings.onkyoClient else {
+                    volumeLabel.title = "Volume: --"
+                    volumeSlider.doubleValue = 50
+                    return
+                }
+                let volume = try await client.getVolume()
+                DispatchQueue.main.async {
+                    self.volumeLabel.title = "Volume: \(volume)"
+                    self.volumeSlider.doubleValue = Double(volume)
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.volumeLabel.title = "Volume: --"
+                    self.volumeSlider.doubleValue = 50
+                }
+            }
+        }
+    }
+
+    // MARK: - App Actions
+
+    @objc private func toggleLaunchAtLogin() {
+        let newState = !settings.launchAtLogin
+        setLaunchAtLogin(newState)
+        settings.launchAtLogin = newState
+        updateLaunchAtLoginItem()
+    }
+
+    private func updateLaunchAtLoginItem() {
+        launchAtLoginItem.state = settings.launchAtLogin ? .on : .off
+    }
+
+    private func setLaunchAtLogin(_ enabled: Bool) {
+        let service = SMAppService.mainApp
+
+        do {
+            if enabled {
+                if service.status == .notRegistered {
+                    try service.register()
+                }
+            } else {
+                if service.status == .enabled {
+                    try service.unregister()
+                }
+            }
+        } catch {
+            NotificationManager.shared.showError(device: "App", message: "Failed to update launch at login")
+        }
+    }
+
+    @objc private func showAbout() {
+        let alert = NSAlert()
+        alert.messageText = "MediaControl"
+        alert.informativeText = "Version 1.0\n\nUnified control for Shield TV and Onkyo receivers"
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
+    }
+
+    @objc private func quit() {
+        NSApplication.shared.terminate(nil)
+    }
+
+    // MARK: - Global Hotkeys
+
+    private func setupGlobalHotkeys() {
+        // Listen for both NSSystemDefined (media keys) and keyDown events
+        // NSSystemDefined = 14 (for media keys F10/F11/F12)
+        // keyDown for Command+F8
+        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << 14)
+
+        guard let eventTap = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: CGEventMask(eventMask),
+            callback: { proxy, type, event, refcon in
+                let controller = Unmanaged<StatusBarController>.fromOpaque(refcon!).takeUnretainedValue()
+                return controller.handleMediaKey(proxy: proxy, type: type, event: event)
+            },
+            userInfo: Unmanaged.passUnretained(self).toOpaque()
+        ) else {
+            showAccessibilityAlert()
+            return
+        }
+
+        self.eventTap = eventTap
+        let runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
+        CGEvent.tapEnable(tap: eventTap, enable: true)
+
+        NSLog("StatusBarController: Global hotkeys enabled (Command+F8, F10/F11/F12)")
+    }
+
+    private func handleMediaKey(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
+        // Re-enable tap if it was disabled
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            NSLog("StatusBarController: Event tap was disabled, re-enabling...")
+            if let tap = eventTap {
+                CGEvent.tapEnable(tap: tap, enable: true)
+            }
+            return Unmanaged.passRetained(event)
+        }
+
+        // Handle Command+F8 for Shield TV play/pause
+        if type == .keyDown {
+            let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+            let flags = event.flags
+
+            // Check for Command modifier (0x100000) and F8 key (keycode 100)
+            if flags.contains(.maskCommand) && keyCode == 100 {
+                NSLog("StatusBarController: Command+F8 (Shield Play/Pause) detected")
+                shieldPlayPause()
+                // Don't pass through to system - consume the event
+                return nil
+            }
+        }
+
+        // Check if this is a system defined event (type 14 for media keys)
+        if type.rawValue == 14 {
+            let nsEvent = NSEvent(cgEvent: event)
+
+            // Media keys are subtype 8 (NX_SUBTYPE_AUX_CONTROL_BUTTONS)
+            if nsEvent?.subtype == .screenChanged {
+                let data = nsEvent?.data1 ?? 0
+                let keyCode = ((data & 0xFFFF0000) >> 16)
+                let keyFlags = (data & 0x0000FFFF)
+                let keyPressed = ((keyFlags & 0xFF00) >> 8) == 0xA
+
+                // Only handle key down events
+                if keyPressed {
+                    switch keyCode {
+                    case 7: // F10 - Mute
+                        NSLog("StatusBarController: F10 (Mute) detected")
+                        toggleMute()
+
+                    case 1: // F11 - Volume Down
+                        NSLog("StatusBarController: F11 (Volume Down) detected")
+                        volumeDown()
+
+                    case 0: // F12 - Volume Up
+                        NSLog("StatusBarController: F12 (Volume Up) detected")
+                        volumeUp()
+
+                    default:
+                        break
+                    }
+                }
+            }
+        }
+
+        // Always pass through the event so system volume also changes
+        return Unmanaged.passRetained(event)
+    }
+
+    private func showAccessibilityAlert() {
+        DispatchQueue.main.async {
+            let alert = NSAlert()
+            alert.messageText = "Accessibility Permissions Required"
+            alert.informativeText = "MediaControl needs Accessibility permissions to enable global hotkeys.\n\nPlease grant permission in System Settings > Privacy & Security > Accessibility"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "Open System Settings")
+            alert.addButton(withTitle: "Skip")
+
+            if alert.runModal() == .alertFirstButtonReturn {
+                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
+            }
+        }
+    }
+}
+
+// MARK: - NSMenuDelegate
+
+extension StatusBarController: NSMenuDelegate {
+    func menuWillOpen(_ menu: NSMenu) {
+        // Update volume display when menu opens
+        updateVolumeDisplay()
+    }
+}
+
+// MARK: - NSMenuItem Extensions
+
+extension NSMenuItem {
+    static func sectionHeader(title: String) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+        item.isEnabled = false
+        return item
+    }
+}

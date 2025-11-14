@@ -1,0 +1,40 @@
+name: MediaControl
+options:
+  bundleIdPrefix: com.mediacontrol
+  deploymentTarget:
+    macOS: "13.0"
+  createIntermediateGroups: true
+
+packages:
+  MediaControl:
+    path: .
+
+targets:
+  MediaControl:
+    type: application
+    platform: macOS
+    sources:
+      - MediaControlApp
+    dependencies:
+      - package: MediaControl
+        product: ShieldClient
+      - package: MediaControl
+        product: OnkyoClient
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mediacontrol.app
+        PRODUCT_NAME: MediaControl
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        ENABLE_HARDENED_RUNTIME: NO
+        MACOSX_DEPLOYMENT_TARGET: "13.0"
+        INFOPLIST_FILE: MediaControlApp/Info.plist
+        SWIFT_VERSION: "5.9"
+      configs:
+        Debug:
+          CODE_SIGN_IDENTITY: "-"
+        Release:
+          CODE_SIGN_IDENTITY: "Apple Development"
+          ENABLE_HARDENED_RUNTIME: YES
+    scheme:
+      testTargets: []
