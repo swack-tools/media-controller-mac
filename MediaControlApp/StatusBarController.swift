@@ -72,6 +72,10 @@ class StatusBarController: NSObject {
         powerOnItem.target = self
         menu.addItem(powerOnItem)
 
+        let powerOffItem = NSMenuItem(title: "🔴 Power Off", action: #selector(shieldPowerOff), keyEquivalent: "")
+        powerOffItem.target = self
+        menu.addItem(powerOffItem)
+
         let playPauseItem = NSMenuItem(title: "⏯ Play/Pause", action: #selector(shieldPlayPause), keyEquivalent: "")
         playPauseItem.target = self
         menu.addItem(playPauseItem)
@@ -112,6 +116,14 @@ class StatusBarController: NSObject {
         muteItem = NSMenuItem(title: "🔇 Mute", action: #selector(toggleMute), keyEquivalent: "")
         muteItem.target = self
         menu.addItem(muteItem)
+
+        let receiverPowerOffItem = NSMenuItem(title: "🔴 Power Off", action: #selector(receiverPowerOff), keyEquivalent: "")
+        receiverPowerOffItem.target = self
+        menu.addItem(receiverPowerOffItem)
+
+        let musicModeItem = NSMenuItem(title: "🎵 Music Mode", action: #selector(setMusicMode), keyEquivalent: "")
+        musicModeItem.target = self
+        menu.addItem(musicModeItem)
 
         // Separator
         menu.addItem(NSMenuItem.separator())
@@ -244,6 +256,21 @@ class StatusBarController: NSObject {
                 }
                 try await client.wakeUp()
                 NotificationManager.shared.showSuccess(device: "Shield TV", message: "Power on sent")
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc private func shieldPowerOff() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.powerOff()
+                NotificationManager.shared.showSuccess(device: "Shield TV", message: "Power off sent")
             } catch {
                 NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
             }
@@ -464,6 +491,36 @@ class StatusBarController: NSObject {
                     return
                 }
                 try await client.toggleMute()
+            } catch {
+                NotificationManager.shared.showError(device: "Receiver", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc private func receiverPowerOff() {
+        Task {
+            do {
+                guard let client = settings.onkyoClient else {
+                    NotificationManager.shared.showError(device: "Receiver", message: "Not configured")
+                    return
+                }
+                try await client.powerOff()
+                NotificationManager.shared.showSuccess(device: "Receiver", message: "Power off sent")
+            } catch {
+                NotificationManager.shared.showError(device: "Receiver", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc private func setMusicMode() {
+        Task {
+            do {
+                guard let client = settings.onkyoClient else {
+                    NotificationManager.shared.showError(device: "Receiver", message: "Not configured")
+                    return
+                }
+                try await client.setMusicMode()
+                NotificationManager.shared.showSuccess(device: "Receiver", message: "Music mode activated")
             } catch {
                 NotificationManager.shared.showError(device: "Receiver", message: error.localizedDescription)
             }

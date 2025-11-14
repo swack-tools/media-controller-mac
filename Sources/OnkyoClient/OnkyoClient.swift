@@ -73,6 +73,24 @@ public class OnkyoClient {
         try await setMute(!currentState)
     }
 
+    /// Power off the receiver
+    /// - Throws: OnkyoClientError if command fails
+    public func powerOff() async throws {
+        _ = try await sendCommand("PWR00", expectingPrefix: "PWR")
+    }
+
+    /// Power on the receiver
+    /// - Throws: OnkyoClientError if command fails
+    public func powerOn() async throws {
+        _ = try await sendCommand("PWR01", expectingPrefix: "PWR")
+    }
+
+    /// Set listening mode to Music
+    /// - Throws: OnkyoClientError if command fails
+    public func setMusicMode() async throws {
+        _ = try await sendCommand("LMD0C", expectingPrefix: "LMD")
+    }
+
     /// Query current mute state
     /// - Returns: True if muted, false otherwise
     /// - Throws: OnkyoClientError if query fails

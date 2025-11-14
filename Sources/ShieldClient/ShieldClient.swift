@@ -65,6 +65,15 @@ public class ShieldClient {
         try await sendKeyCommand(keyCode: KeyCode.wakeUp.rawValue)
     }
 
+    /// Power off Shield TV
+    /// - Throws: ShieldClientError if not paired or command fails
+    public func powerOff() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.power.rawValue)
+    }
+
     /// Send D-pad up command to Shield TV
     public func dpadUp() async throws {
         guard isPaired else {
