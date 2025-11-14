@@ -76,6 +76,9 @@ class StatusBarController: NSObject {
         playPauseItem.target = self
         menu.addItem(playPauseItem)
 
+        // D-pad remote control
+        setupDPadControl()
+
         let configShieldItem = NSMenuItem(title: "Configure Shield IP...", action: #selector(configureShieldIP), keyEquivalent: "")
         configShieldItem.target = self
         menu.addItem(configShieldItem)
@@ -156,6 +159,80 @@ class StatusBarController: NSObject {
         menu.addItem(sliderItem)
     }
 
+    private func setupDPadControl() {
+        // Create container view for D-pad with keyboard event handling
+        let dpadView = DPadView(frame: NSRect(x: 0, y: 0, width: 240, height: 140))
+        dpadView.controller = self
+
+        let buttonSize: CGFloat = 32
+        let centerX: CGFloat = 120
+        let centerY: CGFloat = 70
+        let spacing: CGFloat = 36
+
+        // Up button - aligned with center button
+        let upButton = createDPadButton(
+            frame: NSRect(x: centerX - buttonSize/2, y: centerY + spacing - buttonSize/2, width: buttonSize, height: buttonSize),
+            title: "▲",
+            action: #selector(dpadUpPressed)
+        )
+        dpadView.addSubview(upButton)
+
+        // Down button
+        let downButton = createDPadButton(
+            frame: NSRect(x: centerX - buttonSize/2, y: centerY - spacing - buttonSize/2, width: buttonSize, height: buttonSize),
+            title: "▼",
+            action: #selector(dpadDownPressed)
+        )
+        dpadView.addSubview(downButton)
+
+        // Left button
+        let leftButton = createDPadButton(
+            frame: NSRect(x: centerX - spacing - buttonSize/2, y: centerY - buttonSize/2, width: buttonSize, height: buttonSize),
+            title: "◀",
+            action: #selector(dpadLeftPressed)
+        )
+        dpadView.addSubview(leftButton)
+
+        // Right button
+        let rightButton = createDPadButton(
+            frame: NSRect(x: centerX + spacing - buttonSize/2, y: centerY - buttonSize/2, width: buttonSize, height: buttonSize),
+            title: "▶",
+            action: #selector(dpadRightPressed)
+        )
+        dpadView.addSubview(rightButton)
+
+        // Center button (OK/Select)
+        let centerButton = createDPadButton(
+            frame: NSRect(x: centerX - buttonSize/2, y: centerY - buttonSize/2, width: buttonSize, height: buttonSize),
+            title: "OK",
+            action: #selector(dpadCenterPressed)
+        )
+        centerButton.bezelStyle = .rounded
+        dpadView.addSubview(centerButton)
+
+        // Back button - lower right corner, aligned with down button
+        let backButton = createDPadButton(
+            frame: NSRect(x: centerX + spacing - buttonSize/2, y: centerY - spacing - buttonSize/2, width: buttonSize, height: buttonSize),
+            title: "↩",
+            action: #selector(dpadBackPressed)
+        )
+        dpadView.addSubview(backButton)
+
+        let dpadItem = NSMenuItem()
+        dpadItem.view = dpadView
+        menu.addItem(dpadItem)
+    }
+
+    private func createDPadButton(frame: NSRect, title: String, action: Selector) -> NSButton {
+        let button = NSButton(frame: frame)
+        button.title = title
+        button.target = self
+        button.action = action
+        button.bezelStyle = .rounded
+        button.font = NSFont.systemFont(ofSize: 14)
+        return button
+    }
+
     // MARK: - Shield TV Actions
 
     @objc private func shieldPowerOn() {
@@ -181,6 +258,90 @@ class StatusBarController: NSObject {
                     return
                 }
                 try await client.playPause()
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc fileprivate func dpadUpPressed() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.dpadUp()
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc fileprivate func dpadDownPressed() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.dpadDown()
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc fileprivate func dpadLeftPressed() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.dpadLeft()
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc fileprivate func dpadRightPressed() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.dpadRight()
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc fileprivate func dpadCenterPressed() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.dpadCenter()
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc fileprivate func dpadBackPressed() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.back()
             } catch {
                 NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
             }
@@ -540,5 +701,46 @@ extension NSMenuItem {
         let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
         item.isEnabled = false
         return item
+    }
+}
+
+// MARK: - DPadView
+
+class DPadView: NSView {
+    weak var controller: StatusBarController?
+
+    override var acceptsFirstResponder: Bool {
+        return true
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        // Make this view the first responder when added to window
+        window?.makeFirstResponder(self)
+    }
+
+    override func keyDown(with event: NSEvent) {
+        guard let controller = controller else {
+            super.keyDown(with: event)
+            return
+        }
+
+        // Handle arrow keys and special keys
+        switch Int(event.keyCode) {
+        case 126: // Up arrow
+            controller.dpadUpPressed()
+        case 125: // Down arrow
+            controller.dpadDownPressed()
+        case 123: // Left arrow
+            controller.dpadLeftPressed()
+        case 124: // Right arrow
+            controller.dpadRightPressed()
+        case 36, 76: // Return or Enter
+            controller.dpadCenterPressed()
+        case 51: // Delete/Backspace
+            controller.dpadBackPressed()
+        default:
+            super.keyDown(with: event)
+        }
     }
 }

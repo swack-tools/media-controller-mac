@@ -65,6 +65,54 @@ public class ShieldClient {
         try await sendKeyCommand(keyCode: KeyCode.wakeUp.rawValue)
     }
 
+    /// Send D-pad up command to Shield TV
+    public func dpadUp() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.dpadUp.rawValue)
+    }
+
+    /// Send D-pad down command to Shield TV
+    public func dpadDown() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.dpadDown.rawValue)
+    }
+
+    /// Send D-pad left command to Shield TV
+    public func dpadLeft() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.dpadLeft.rawValue)
+    }
+
+    /// Send D-pad right command to Shield TV
+    public func dpadRight() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.dpadRight.rawValue)
+    }
+
+    /// Send D-pad center (select) command to Shield TV
+    public func dpadCenter() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.dpadCenter.rawValue)
+    }
+
+    /// Send back command to Shield TV
+    public func back() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.back.rawValue)
+    }
+
     // MARK: - Private Implementation
 
     private func performPairing(pinProvider: () async throws -> String) async throws {
