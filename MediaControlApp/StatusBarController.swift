@@ -68,6 +68,10 @@ class StatusBarController: NSObject {
         // Shield TV section
         menu.addItem(NSMenuItem.sectionHeader(title: "Shield TV"))
 
+        let powerOnItem = NSMenuItem(title: "⚡️ Power On", action: #selector(shieldPowerOn), keyEquivalent: "")
+        powerOnItem.target = self
+        menu.addItem(powerOnItem)
+
         let playPauseItem = NSMenuItem(title: "⏯ Play/Pause", action: #selector(shieldPlayPause), keyEquivalent: "")
         playPauseItem.target = self
         menu.addItem(playPauseItem)
@@ -153,6 +157,21 @@ class StatusBarController: NSObject {
     }
 
     // MARK: - Shield TV Actions
+
+    @objc private func shieldPowerOn() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.wakeUp()
+                NotificationManager.shared.showSuccess(device: "Shield TV", message: "Power on sent")
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
 
     @objc private func shieldPlayPause() {
         Task {

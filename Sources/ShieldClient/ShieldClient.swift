@@ -56,6 +56,15 @@ public class ShieldClient {
         try await sendKeyCommand(keyCode: KeyCode.mediaPause.rawValue)
     }
 
+    /// Wake up Shield TV (power on if sleeping)
+    /// - Throws: ShieldClientError if not paired or command fails
+    public func wakeUp() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.wakeUp.rawValue)
+    }
+
     // MARK: - Private Implementation
 
     private func performPairing(pinProvider: () async throws -> String) async throws {

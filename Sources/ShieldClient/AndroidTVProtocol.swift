@@ -23,6 +23,8 @@ enum KeyCode: UInt32 {
     case dpadLeft = 21
     case dpadRight = 22
     case dpadCenter = 23
+    case wakeUp = 224
+    case power = 26
 }
 
 // MARK: - Protocol Messages
