@@ -156,6 +156,7 @@ dmg: release
             --icon "MediaControl.app" 175 120 \
             --hide-extension "MediaControl.app" \
             --app-drop-link 425 120 \
+            --skip-jenkins \
             "build/MediaControl.dmg" \
             "build/Build/Products/Release/MediaControl.app"; \
         echo "✅ Created build/MediaControl.dmg"; \
@@ -188,6 +189,7 @@ create-dmg VERSION:
     rm -f "dist/MediaControl-{{VERSION}}.dmg"
 
     # Create versioned DMG
+    # Use --skip-jenkins to skip AppleScript customization (works in CI without GUI)
     create-dmg \
         --volname "MediaControl {{VERSION}}" \
         --window-pos 200 120 \
@@ -196,6 +198,7 @@ create-dmg VERSION:
         --icon "MediaControl.app" 175 120 \
         --hide-extension "MediaControl.app" \
         --app-drop-link 425 120 \
+        --skip-jenkins \
         "dist/MediaControl-{{VERSION}}.dmg" \
         "build/Build/Products/Release/MediaControl.app"
 
