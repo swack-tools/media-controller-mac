@@ -3,11 +3,11 @@ import Foundation
 /// Validation utilities for IP addresses and PINs
 public struct Validators {
     /// Validates IPv4 address format
-    /// - Parameter ip: IP address string to validate
+    /// - Parameter ipAddress: IP address string to validate
     /// - Returns: True if valid IPv4 address
-    public static func isValidIPAddress(_ ip: String) -> Bool {
+    public static func isValidIPAddress(_ ipAddress: String) -> Bool {
         // Check basic format: xxx.xxx.xxx.xxx
-        let components = ip.components(separatedBy: ".")
+        let components = ipAddress.components(separatedBy: ".")
         guard components.count == 4 else {
             return false
         }

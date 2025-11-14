@@ -25,7 +25,12 @@ class AndroidTVConnection {
     }
 
     /// Connect to Shield TV with TLS
-    func connect(host: String, port: UInt16, useTLS: Bool = true, certificateStore: CertificateStore? = nil) async throws {
+    func connect(
+        host: String,
+        port: UInt16,
+        useTLS: Bool = true,
+        certificateStore: CertificateStore? = nil
+    ) async throws {
         self.certificateStore = certificateStore
 
         let tlsOptions: NWProtocolTLS.Options?
@@ -59,8 +64,11 @@ class AndroidTVConnection {
                     resumed = true
 
                     // Capture server certificate from TLS metadata
-                    if useTLS, let conn = self?.connection,
-                       let tlsMetadata = conn.metadata(definition: NWProtocolTLS.definition) as? NWProtocolTLS.Metadata {
+                    if useTLS,
+                       let conn = self?.connection,
+                       let tlsMetadata = conn.metadata(
+                           definition: NWProtocolTLS.definition
+                       ) as? NWProtocolTLS.Metadata {
                         let secMetadata = tlsMetadata.securityProtocolMetadata
 
                         // Iterate through peer certificates to get the first one
@@ -119,7 +127,10 @@ class AndroidTVConnection {
         }
 
         return try await withCheckedThrowingContinuation { continuation in
-            connection.receive(minimumIncompleteLength: minLength, maximumLength: maxLength) { data, _, isComplete, error in
+            connection.receive(
+                minimumIncompleteLength: minLength,
+                maximumLength: maxLength
+            ) { data, _, _, error in
                 if let error = error {
                     continuation.resume(throwing: ConnectionError.receiveFailed(error.localizedDescription))
                 } else if let data = data {

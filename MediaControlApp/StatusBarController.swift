@@ -9,6 +9,9 @@ class StatusBarController: NSObject {
     private var menu: NSMenu!
     private var volumeSlider: NSSlider!
     private var volumeLabel: NSMenuItem!
+    private var inputSourceLabel: NSMenuItem!
+    private var videoInfoLabels: [NSMenuItem] = []
+    private var listeningModeLabel: NSMenuItem!
     private var muteItem: NSMenuItem!
     private var launchAtLoginItem: NSMenuItem!
     private var eventTap: CFMachPort?
@@ -48,7 +51,11 @@ class StatusBarController: NSObject {
             // Use SF Symbol if available (macOS 11+), otherwise use text
             if #available(macOS 11.0, *) {
                 let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .regular)
-                button.image = NSImage(systemSymbolName: "speaker.wave.2.fill", accessibilityDescription: "MediaControl")?.withSymbolConfiguration(config)
+                let symbolImage = NSImage(
+                    systemSymbolName: "speaker.wave.2.fill",
+                    accessibilityDescription: "MediaControl"
+                )
+                button.image = symbolImage?.withSymbolConfiguration(config)
                 NSLog("StatusBarController: Set SF Symbol image: %@", button.image != nil ? "YES" : "NO")
             }
 
@@ -83,7 +90,11 @@ class StatusBarController: NSObject {
         // D-pad remote control
         setupDPadControl()
 
-        let configShieldItem = NSMenuItem(title: "Configure Shield IP...", action: #selector(configureShieldIP), keyEquivalent: "")
+        let configShieldItem = NSMenuItem(
+            title: "Configure Shield IP...",
+            action: #selector(configureShieldIP),
+            keyEquivalent: ""
+        )
         configShieldItem.target = self
         menu.addItem(configShieldItem)
 
@@ -105,6 +116,19 @@ class StatusBarController: NSObject {
         // Volume slider
         setupVolumeSlider()
 
+        // Input source label
+        inputSourceLabel = NSMenuItem(title: "Input: --", action: nil, keyEquivalent: "")
+        inputSourceLabel.isEnabled = false
+        menu.addItem(inputSourceLabel)
+
+        // Video information labels (multi-line, added dynamically)
+        // Placeholder will be replaced on menu open
+
+        // Listening mode label
+        listeningModeLabel = NSMenuItem(title: "Mode: --", action: nil, keyEquivalent: "")
+        listeningModeLabel.isEnabled = false
+        menu.addItem(listeningModeLabel)
+
         let volumeUpItem = NSMenuItem(title: "Volume Up (+5)", action: #selector(volumeUp), keyEquivalent: "")
         volumeUpItem.target = self
         menu.addItem(volumeUpItem)
@@ -117,7 +141,11 @@ class StatusBarController: NSObject {
         muteItem.target = self
         menu.addItem(muteItem)
 
-        let receiverPowerOffItem = NSMenuItem(title: "🔴 Power Off", action: #selector(receiverPowerOff), keyEquivalent: "")
+        let receiverPowerOffItem = NSMenuItem(
+            title: "🔴 Power Off",
+            action: #selector(receiverPowerOff),
+            keyEquivalent: ""
+        )
         receiverPowerOffItem.target = self
         menu.addItem(receiverPowerOffItem)
 
@@ -128,12 +156,20 @@ class StatusBarController: NSObject {
         // Separator
         menu.addItem(NSMenuItem.separator())
 
-        let configReceiverItem = NSMenuItem(title: "Configure Receiver IP...", action: #selector(configureReceiverIP), keyEquivalent: "")
+        let configReceiverItem = NSMenuItem(
+            title: "Configure Receiver IP...",
+            action: #selector(configureReceiverIP),
+            keyEquivalent: ""
+        )
         configReceiverItem.target = self
         menu.addItem(configReceiverItem)
 
         // Launch at login
-        launchAtLoginItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
+        launchAtLoginItem = NSMenuItem(
+            title: "Launch at Login",
+            action: #selector(toggleLaunchAtLogin),
+            keyEquivalent: ""
+        )
         launchAtLoginItem.target = self
         menu.addItem(launchAtLoginItem)
         updateLaunchAtLoginItem()
@@ -161,7 +197,13 @@ class StatusBarController: NSObject {
     private func setupVolumeSlider() {
         let sliderView = NSView(frame: NSRect(x: 0, y: 0, width: 240, height: 30))
 
-        volumeSlider = NSSlider(value: 50, minValue: 0, maxValue: 100, target: self, action: #selector(volumeSliderChanged))
+        volumeSlider = NSSlider(
+            value: 50,
+            minValue: 0,
+            maxValue: 100,
+            target: self,
+            action: #selector(volumeSliderChanged)
+        )
         volumeSlider.frame = NSRect(x: 20, y: 5, width: 200, height: 20)
 
         sliderView.addSubview(volumeSlider)
@@ -183,7 +225,12 @@ class StatusBarController: NSObject {
 
         // Up button - aligned with center button
         let upButton = createDPadButton(
-            frame: NSRect(x: centerX - buttonSize/2, y: centerY + spacing - buttonSize/2, width: buttonSize, height: buttonSize),
+            frame: NSRect(
+                x: centerX - buttonSize/2,
+                y: centerY + spacing - buttonSize/2,
+                width: buttonSize,
+                height: buttonSize
+            ),
             title: "▲",
             action: #selector(dpadUpPressed)
         )
@@ -191,7 +238,12 @@ class StatusBarController: NSObject {
 
         // Down button
         let downButton = createDPadButton(
-            frame: NSRect(x: centerX - buttonSize/2, y: centerY - spacing - buttonSize/2, width: buttonSize, height: buttonSize),
+            frame: NSRect(
+                x: centerX - buttonSize/2,
+                y: centerY - spacing - buttonSize/2,
+                width: buttonSize,
+                height: buttonSize
+            ),
             title: "▼",
             action: #selector(dpadDownPressed)
         )
@@ -199,7 +251,12 @@ class StatusBarController: NSObject {
 
         // Left button
         let leftButton = createDPadButton(
-            frame: NSRect(x: centerX - spacing - buttonSize/2, y: centerY - buttonSize/2, width: buttonSize, height: buttonSize),
+            frame: NSRect(
+                x: centerX - spacing - buttonSize/2,
+                y: centerY - buttonSize/2,
+                width: buttonSize,
+                height: buttonSize
+            ),
             title: "◀",
             action: #selector(dpadLeftPressed)
         )
@@ -207,7 +264,12 @@ class StatusBarController: NSObject {
 
         // Right button
         let rightButton = createDPadButton(
-            frame: NSRect(x: centerX + spacing - buttonSize/2, y: centerY - buttonSize/2, width: buttonSize, height: buttonSize),
+            frame: NSRect(
+                x: centerX + spacing - buttonSize/2,
+                y: centerY - buttonSize/2,
+                width: buttonSize,
+                height: buttonSize
+            ),
             title: "▶",
             action: #selector(dpadRightPressed)
         )
@@ -224,7 +286,12 @@ class StatusBarController: NSObject {
 
         // Back button - lower right corner, aligned with down button
         let backButton = createDPadButton(
-            frame: NSRect(x: centerX + spacing - buttonSize/2, y: centerY - spacing - buttonSize/2, width: buttonSize, height: buttonSize),
+            frame: NSRect(
+                x: centerX + spacing - buttonSize/2,
+                y: centerY - spacing - buttonSize/2,
+                width: buttonSize,
+                height: buttonSize
+            ),
             title: "↩",
             action: #selector(dpadBackPressed)
         )
@@ -391,9 +458,9 @@ class StatusBarController: NSObject {
 
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
-            let ip = inputField.stringValue.trimmingCharacters(in: .whitespaces)
-            if Validators.isValidIPAddress(ip) {
-                settings.shieldIP = ip
+            let ipAddress = inputField.stringValue.trimmingCharacters(in: .whitespaces)
+            if Validators.isValidIPAddress(ipAddress) {
+                settings.shieldIP = ipAddress
                 NotificationManager.shared.showSuccess(device: "Shield TV", message: "IP saved")
             } else {
                 NotificationManager.shared.showError(device: "Shield TV", message: "Invalid IP address")
@@ -403,7 +470,7 @@ class StatusBarController: NSObject {
 
     @objc private func pairShield() {
         // First, ensure IP is configured
-        guard let ip = settings.shieldIP else {
+        guard let ipAddress = settings.shieldIP else {
             NotificationManager.shared.showError(device: "Shield TV", message: "Configure IP first")
             return
         }
@@ -423,7 +490,9 @@ class StatusBarController: NSObject {
                         DispatchQueue.main.async {
                             let alert = NSAlert()
                             alert.messageText = "Enter Pairing PIN"
-                            alert.informativeText = "A 6-character PIN should now be displayed on your Shield TV.\nEnter it below:"
+                            let infoText = "A 6-character PIN should now be displayed on "
+                                + "your Shield TV.\nEnter it below:"
+                            alert.informativeText = infoText
                             alert.alertStyle = .informational
 
                             let inputField = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
@@ -438,7 +507,12 @@ class StatusBarController: NSObject {
                                 let pin = inputField.stringValue.trimmingCharacters(in: .whitespaces).uppercased()
                                 continuation.resume(returning: pin)
                             } else {
-                                continuation.resume(throwing: NSError(domain: "PairingCancelled", code: -1, userInfo: [NSLocalizedDescriptionKey: "Pairing cancelled by user"]))
+                                let error = NSError(
+                                    domain: "PairingCancelled",
+                                    code: -1,
+                                    userInfo: [NSLocalizedDescriptionKey: "Pairing cancelled by user"]
+                                )
+                                continuation.resume(throwing: error)
                             }
                         }
                     }
@@ -557,9 +631,9 @@ class StatusBarController: NSObject {
 
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
-            let ip = inputField.stringValue.trimmingCharacters(in: .whitespaces)
-            if Validators.isValidIPAddress(ip) {
-                settings.receiverIP = ip
+            let ipAddress = inputField.stringValue.trimmingCharacters(in: .whitespaces)
+            if Validators.isValidIPAddress(ipAddress) {
+                settings.receiverIP = ipAddress
                 NotificationManager.shared.showSuccess(device: "Receiver", message: "IP saved")
                 updateVolumeDisplay()
             } else {
@@ -585,6 +659,121 @@ class StatusBarController: NSObject {
                 DispatchQueue.main.async {
                     self.volumeLabel.title = "Volume: --"
                     self.volumeSlider.doubleValue = 50
+                }
+            }
+        }
+    }
+
+    private func updateInputSourceDisplay() {
+        Task {
+            do {
+                guard let client = settings.onkyoClient else {
+                    inputSourceLabel.title = "Input: --"
+                    return
+                }
+                let inputSource = try await client.getInputSource()
+                DispatchQueue.main.async {
+                    self.inputSourceLabel.title = "Input: \(inputSource)"
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.inputSourceLabel.title = "Input: --"
+                }
+            }
+        }
+    }
+
+    private func updateVideoInfoDisplay() {
+        Task {
+            do {
+                guard let client = settings.onkyoClient else {
+                    await clearVideoInfoLabels()
+                    await addVideoInfoLabel("Video: --")
+                    return
+                }
+                let videoInfoLines = try await client.getVideoInformation()
+                DispatchQueue.main.async {
+                    // Clear existing video info labels
+                    for label in self.videoInfoLabels {
+                        self.menu.removeItem(label)
+                    }
+                    self.videoInfoLabels.removeAll()
+
+                    // Find insertion index (after input source label)
+                    guard let inputIndex = self.menu.items.firstIndex(of: self.inputSourceLabel) else {
+                        return
+                    }
+                    let insertIndex = inputIndex + 1
+
+                    // Add new video info labels
+                    for (index, line) in videoInfoLines.enumerated() {
+                        let label = NSMenuItem(
+                            title: index == 0 ? "Video: \(line)" : "  \(line)",
+                            action: nil,
+                            keyEquivalent: ""
+                        )
+                        label.isEnabled = false
+                        self.menu.insertItem(label, at: insertIndex + index)
+                        self.videoInfoLabels.append(label)
+                    }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    // Clear existing video info labels
+                    for label in self.videoInfoLabels {
+                        self.menu.removeItem(label)
+                    }
+                    self.videoInfoLabels.removeAll()
+
+                    // Find insertion index
+                    guard let inputIndex = self.menu.items.firstIndex(of: self.inputSourceLabel) else {
+                        return
+                    }
+
+                    let label = NSMenuItem(title: "Video: --", action: nil, keyEquivalent: "")
+                    label.isEnabled = false
+                    self.menu.insertItem(label, at: inputIndex + 1)
+                    self.videoInfoLabels.append(label)
+                }
+            }
+        }
+    }
+
+    private func clearVideoInfoLabels() async {
+        await MainActor.run {
+            for label in self.videoInfoLabels {
+                self.menu.removeItem(label)
+            }
+            self.videoInfoLabels.removeAll()
+        }
+    }
+
+    private func addVideoInfoLabel(_ title: String) async {
+        await MainActor.run {
+            guard let inputIndex = self.menu.items.firstIndex(of: self.inputSourceLabel) else {
+                return
+            }
+            let label = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+            label.isEnabled = false
+            self.menu.insertItem(label, at: inputIndex + 1)
+            self.videoInfoLabels.append(label)
+        }
+    }
+
+    private func updateListeningModeDisplay() {
+        Task {
+            do {
+                guard let client = settings.onkyoClient else {
+                    listeningModeLabel.title = "Mode: --"
+                    return
+                }
+                let listeningMode = try await client.getListeningMode()
+                DispatchQueue.main.async {
+                    self.listeningModeLabel.title = "Mode: \(listeningMode)"
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.listeningModeLabel.title = "Mode: --"
                 }
             }
         }
@@ -730,13 +919,18 @@ class StatusBarController: NSObject {
         DispatchQueue.main.async {
             let alert = NSAlert()
             alert.messageText = "Accessibility Permissions Required"
-            alert.informativeText = "MediaControl needs Accessibility permissions to enable global hotkeys.\n\nPlease grant permission in System Settings > Privacy & Security > Accessibility"
+            let infoText = "MediaControl needs Accessibility permissions to enable global hotkeys.\n\n"
+                + "Please grant permission in System Settings > Privacy & Security > Accessibility"
+            alert.informativeText = infoText
             alert.alertStyle = .warning
             alert.addButton(withTitle: "Open System Settings")
             alert.addButton(withTitle: "Skip")
 
             if alert.runModal() == .alertFirstButtonReturn {
-                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
+                let urlString = "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+                if let url = URL(string: urlString) {
+                    NSWorkspace.shared.open(url)
+                }
             }
         }
     }
@@ -746,8 +940,11 @@ class StatusBarController: NSObject {
 
 extension StatusBarController: NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
-        // Update volume display when menu opens
+        // Update volume, input source, video info, and listening mode display when menu opens
         updateVolumeDisplay()
+        updateInputSourceDisplay()
+        updateVideoInfoDisplay()
+        updateListeningModeDisplay()
     }
 }
 

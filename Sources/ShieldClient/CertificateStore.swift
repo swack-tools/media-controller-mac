@@ -79,6 +79,7 @@ public class CertificateStore {
             throw CertificateStoreError.loadFailed("No identity found in P12")
         }
 
+        // swiftlint:disable:next force_cast
         let identity = identityRef as! SecIdentity
         return identity
     }

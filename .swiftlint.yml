@@ -1,0 +1,23 @@
+# SwiftLint Configuration
+excluded:
+  - backup
+  - build
+  - .build
+  - Packages
+  - "**/GeneratedAssetSymbols.swift"
+
+# Adjust type body length to accommodate current StatusBarController
+# TODO: Refactor StatusBarController to reduce size
+type_body_length:
+  warning: 500
+  error: 800
+
+# Adjust file length to accommodate current files
+file_length:
+  warning: 500
+  error: 1050
+
+# Adjust function body length
+function_body_length:
+  warning: 60
+  error: 110

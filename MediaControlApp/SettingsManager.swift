@@ -52,16 +52,16 @@ class SettingsManager {
     }
 
     private func updateShieldClient() {
-        if let ip = shieldIP {
-            shieldClient = ShieldClient(host: ip, certificateStore: certificateStore)
+        if let ipAddress = shieldIP {
+            shieldClient = ShieldClient(host: ipAddress, certificateStore: certificateStore)
         } else {
             shieldClient = nil
         }
     }
 
     private func updateOnkyoClient() {
-        if let ip = receiverIP {
-            onkyoClient = OnkyoClient(host: ip)
+        if let ipAddress = receiverIP {
+            onkyoClient = OnkyoClient(host: ipAddress)
         } else {
             onkyoClient = nil
         }

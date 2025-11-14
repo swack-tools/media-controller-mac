@@ -91,6 +91,163 @@ public class OnkyoClient {
         _ = try await sendCommand("LMD0C", expectingPrefix: "LMD")
     }
 
+    /// Query current input source from audio information
+    /// - Returns: Input source name (e.g., "HDMI 3", "Optical", etc.)
+    /// - Throws: OnkyoClientError if query fails
+    public func getInputSource() async throws -> String {
+        let response = try await sendCommand("IFAQSTN", expectingPrefix: "IFA")
+
+        // Parse IFA response - format:
+        // "!1IFA{input},{format},{sample rate},{channels},{listening mode},...\u{1A}\r\n"
+        // Example: "!1IFAHDMI 3,PCM,48 kHz,2.0 ch,All Ch Stereo,5.0.2 ch,\u{1A}\r\n"
+        let cleaned = response.replacingOccurrences(of: "!1", with: "")
+            .replacingOccurrences(of: "\r", with: "")
+            .replacingOccurrences(of: "\n", with: "")
+            .replacingOccurrences(of: "\u{1A}", with: "")
+            .trimmingCharacters(in: .whitespaces)
+
+        if cleaned.hasPrefix("IFA") {
+            let infoString = String(cleaned.dropFirst(3))
+            let components = infoString.components(separatedBy: ",")
+
+            // Input source is the 1st component (index 0)
+            if !components.isEmpty {
+                let inputSource = components[0].trimmingCharacters(in: .whitespaces)
+                return inputSource.isEmpty ? "Unknown" : truncateString(inputSource, maxLength: 25)
+            }
+        }
+        throw OnkyoClientError.invalidResponse
+    }
+
+    /// Query current listening mode from audio information
+    /// - Returns: Listening mode name (e.g., "All Ch Stereo", "Music", etc.)
+    /// - Throws: OnkyoClientError if query fails
+    public func getListeningMode() async throws -> String {
+        let response = try await sendCommand("IFAQSTN", expectingPrefix: "IFA")
+
+        // Parse IFA response - format:
+        // "!1IFA{input},{format},{sample rate},{channels},{listening mode},...\u{1A}\r\n"
+        // Example: "!1IFAHDMI 3,PCM,48 kHz,2.0 ch,All Ch Stereo,5.0.2 ch,\u{1A}\r\n"
+        let cleaned = response.replacingOccurrences(of: "!1", with: "")
+            .replacingOccurrences(of: "\r", with: "")
+            .replacingOccurrences(of: "\n", with: "")
+            .replacingOccurrences(of: "\u{1A}", with: "")
+            .trimmingCharacters(in: .whitespaces)
+
+        if cleaned.hasPrefix("IFA") {
+            let infoString = String(cleaned.dropFirst(3))
+            let components = infoString.components(separatedBy: ",")
+
+            // Listening mode is typically the 5th component (index 4)
+            if components.count > 4 {
+                let listeningMode = components[4].trimmingCharacters(in: .whitespaces)
+                return listeningMode.isEmpty ? "Unknown" : truncateString(listeningMode, maxLength: 25)
+            }
+        }
+        throw OnkyoClientError.invalidResponse
+    }
+
+    /// Query current video information
+    /// - Returns: Array of video information lines for display
+    /// - Throws: OnkyoClientError if query fails
+    public func getVideoInformation() async throws -> [String] {
+        let response = try await sendCommand("IFVQSTN", expectingPrefix: "IFV")
+
+        // Parse IFV response - format varies by receiver
+        // Example: "!1IFV1920x1080p,HDMI\u{1A}\r\n" or "!1IFV1080p\u{1A}\r\n"
+        let cleaned = response.replacingOccurrences(of: "!1", with: "")
+            .replacingOccurrences(of: "\r", with: "")
+            .replacingOccurrences(of: "\n", with: "")
+            .replacingOccurrences(of: "\u{1A}", with: "")
+            .trimmingCharacters(in: .whitespaces)
+
+        if cleaned.hasPrefix("IFV") {
+            let videoInfo = String(cleaned.dropFirst(3)).trimmingCharacters(in: .whitespaces)
+            if videoInfo.isEmpty {
+                return ["No Signal"]
+            }
+            return parseVideoInfo(videoInfo)
+        }
+        throw OnkyoClientError.invalidResponse
+    }
+
+    /// Parse video information into display lines
+    /// - Parameter rawInfo: Raw video info string from receiver
+    /// - Returns: Array of formatted lines for display
+    private func parseVideoInfo(_ rawInfo: String) -> [String] {
+        // Split by comma to get components
+        let parts = rawInfo.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+
+        var lines: [String] = []
+        var resolution = ""
+        var details: [String] = []
+
+        for part in parts {
+            // Parse resolution
+            if part.contains("x") {
+                // Extract resolution like "1920x1080p" -> "1080p" or "3840x2160p" -> "4K"
+                if let match = part.range(of: #"(\d+)x(\d+)([pi]?)"#, options: .regularExpression) {
+                    let resString = String(part[match])
+                    if resString.contains("3840x2160") || resString.contains("4096x2160") {
+                        resolution = "4K" + (resString.hasSuffix("i") ? "i" : "")
+                    } else if resString.contains("1920x1080") {
+                        resolution = "1080" + (resString.hasSuffix("i") ? "i" : "p")
+                    } else if resString.contains("1280x720") {
+                        resolution = "720p"
+                    } else if resString.contains("2560x1440") {
+                        resolution = "1440p"
+                    } else {
+                        resolution = resString
+                    }
+                }
+            } else if part.uppercased() == "HDMI" {
+                // Skip HDMI as it's redundant (shown in input)
+                continue
+            } else if !part.isEmpty {
+                // Add other details (HDR, color space, frame rate, etc.)
+                details.append(part)
+            }
+        }
+
+        // Build display lines
+        if !resolution.isEmpty {
+            lines.append(resolution)
+        }
+
+        // Group details into lines of reasonable length
+        if !details.isEmpty {
+            var currentLine = ""
+            for detail in details {
+                if currentLine.isEmpty {
+                    currentLine = detail
+                } else if (currentLine + " " + detail).count <= 30 {
+                    currentLine += " " + detail
+                } else {
+                    lines.append(currentLine)
+                    currentLine = detail
+                }
+            }
+            if !currentLine.isEmpty {
+                lines.append(currentLine)
+            }
+        }
+
+        return lines.isEmpty ? [rawInfo] : lines
+    }
+
+    /// Truncate string with ellipsis if needed
+    /// - Parameters:
+    ///   - string: String to truncate
+    ///   - maxLength: Maximum length before truncation
+    /// - Returns: Truncated string with ellipsis if over maxLength
+    private func truncateString(_ string: String, maxLength: Int) -> String {
+        if string.count > maxLength {
+            let index = string.index(string.startIndex, offsetBy: maxLength - 3)
+            return String(string[..<index]) + "..."
+        }
+        return string
+    }
+
     /// Query current mute state
     /// - Returns: True if muted, false otherwise
     /// - Throws: OnkyoClientError if query fails

@@ -16,7 +16,8 @@ enum ShieldRemoteHelpers {
         var error: Unmanaged<CFError>?
         guard let keyData = SecKeyCopyExternalRepresentation(publicKey, &error) as Data? else {
             let err = error?.takeRetainedValue()
-            throw ShieldClientError.connectionFailed("Failed to export public key: \(err?.localizedDescription ?? "unknown")")
+            let errorMsg = err?.localizedDescription ?? "unknown"
+            throw ShieldClientError.connectionFailed("Failed to export public key: \(errorMsg)")
         }
 
         // Parse RSA public key structure

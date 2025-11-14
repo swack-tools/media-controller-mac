@@ -140,8 +140,8 @@ final class ShieldClientTests: XCTestCase {
         XCTAssertGreaterThan(msg.count, 0)
 
         // Should contain the strings as UTF-8 byte sequences
-        let clientBytes = "TestClient".data(using: .utf8)!
-        let serviceBytes = "TestService".data(using: .utf8)!
+        let clientBytes = Data("TestClient".utf8)
+        let serviceBytes = Data("TestService".utf8)
 
         // Search for byte sequences in the protobuf message
         XCTAssertTrue(msg.range(of: clientBytes) != nil, "Message should contain TestClient")
@@ -211,7 +211,7 @@ final class ShieldClientTests: XCTestCase {
         XCTAssertGreaterThan(msg.count, 0)
 
         // Should contain package name as UTF-8 byte sequence
-        let packageBytes = "ShieldPause".data(using: .utf8)!
+        let packageBytes = Data("ShieldPause".utf8)
         XCTAssertTrue(msg.range(of: packageBytes) != nil, "Message should contain ShieldPause")
     }
 
@@ -304,11 +304,10 @@ extension Data {
         guard bytes.count > 0 else { return false }
         guard self.count >= bytes.count else { return false }
 
-        for startIndex in 0...(self.count - bytes.count) {
-            // Check if all bytes match at this position
-            if (0..<bytes.count).allSatisfy({ self[startIndex + $0] == bytes[$0] }) {
-                return true
-            }
+        // Check if all bytes match at any position
+        for startIndex in 0...(self.count - bytes.count)
+            where (0..<bytes.count).allSatisfy({ self[startIndex + $0] == bytes[$0] }) {
+            return true
         }
         return false
     }
