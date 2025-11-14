@@ -24,19 +24,17 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mediacontrol.app
         PRODUCT_NAME: MediaControl
-        CODE_SIGN_IDENTITY: "-"
-        CODE_SIGN_STYLE: Manual
-        ENABLE_HARDENED_RUNTIME: NO
         MACOSX_DEPLOYMENT_TARGET: "13.0"
         INFOPLIST_FILE: MediaControlApp/Info.plist
         SWIFT_VERSION: "5.9"
       configs:
         Debug:
           CODE_SIGN_IDENTITY: "-"
-        Release:
           CODE_SIGN_STYLE: Manual
+          ENABLE_HARDENED_RUNTIME: NO
+        Release:
+          CODE_SIGN_STYLE: Automatic
           CODE_SIGN_IDENTITY: "Developer ID Application"
           ENABLE_HARDENED_RUNTIME: YES
-          PROVISIONING_PROFILE_SPECIFIER: ""
     scheme:
       testTargets: []
