@@ -190,10 +190,11 @@ public class OnkyoClient {
 
         var lines: [String] = []
         var details: [String] = []
+        let maxLineLength = 25
 
         // Skip index 0 (input source) - shown in Input field
         // Skip index 4 (listening mode) - shown in Mode field
-        // Collect format, sample rate, channels
+        // Collect format, sample rate, channels, and any additional info
         if components.count > 1 {
             details.append(components[1]) // Format (PCM, DTS, etc.)
         }
@@ -203,28 +204,31 @@ public class OnkyoClient {
         if components.count > 3 {
             details.append(components[3]) // Channels (2.0 ch, etc.)
         }
+        // Add any additional info beyond index 5 (skip index 4 which is listening mode)
+        if components.count > 5 {
+            for index in 5..<components.count {
+                let info = components[index].trimmingCharacters(in: .whitespaces)
+                if !info.isEmpty {
+                    details.append(info)
+                }
+            }
+        }
 
-        // Build line with format, sample rate, channels
+        // Build lines with max length constraint
         if !details.isEmpty {
-            let firstLine = details.joined(separator: " ")
-            if firstLine.count > 30 {
-                // Split into multiple parts if too long
-                var currentLine = ""
-                for detail in details {
-                    if currentLine.isEmpty {
-                        currentLine = detail
-                    } else if (currentLine + " " + detail).count <= 30 {
-                        currentLine += " " + detail
-                    } else {
-                        lines.append(currentLine)
-                        currentLine = detail
-                    }
-                }
-                if !currentLine.isEmpty {
+            var currentLine = ""
+            for detail in details {
+                if currentLine.isEmpty {
+                    currentLine = detail
+                } else if (currentLine + " " + detail).count <= maxLineLength {
+                    currentLine += " " + detail
+                } else {
                     lines.append(currentLine)
+                    currentLine = detail
                 }
-            } else {
-                lines.append(firstLine)
+            }
+            if !currentLine.isEmpty {
+                lines.append(currentLine)
             }
         }
 
@@ -265,6 +269,7 @@ public class OnkyoClient {
         var lines: [String] = []
         var resolution = ""
         var details: [String] = []
+        let maxLineLength = 25
 
         for part in parts {
             // Skip HDMI port information as it's shown in Input field
@@ -307,7 +312,7 @@ public class OnkyoClient {
             for detail in details {
                 if currentLine.isEmpty {
                     currentLine = detail
-                } else if (currentLine + " " + detail).count <= 30 {
+                } else if (currentLine + " " + detail).count <= maxLineLength {
                     currentLine += " " + detail
                 } else {
                     lines.append(currentLine)
