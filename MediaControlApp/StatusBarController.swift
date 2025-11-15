@@ -113,6 +113,15 @@ class StatusBarController: NSObject {
         // Receiver section
         menu.addItem(NSMenuItem.sectionHeader(title: "Receiver"))
 
+        // Power Off
+        let receiverPowerOffItem = NSMenuItem(
+            title: "🔴 Power Off",
+            action: #selector(receiverPowerOff),
+            keyEquivalent: ""
+        )
+        receiverPowerOffItem.target = self
+        menu.addItem(receiverPowerOffItem)
+
         // Input source label
         inputSourceLabel = NSMenuItem(title: "Input: --", action: nil, keyEquivalent: "")
         inputSourceLabel.isEnabled = false
@@ -145,6 +154,16 @@ class StatusBarController: NSObject {
         volumeDownItem.target = self
         menu.addItem(volumeDownItem)
 
+        // Mute
+        muteItem = NSMenuItem(title: "🔇 Mute", action: #selector(toggleMute), keyEquivalent: "")
+        muteItem.target = self
+        menu.addItem(muteItem)
+
+        // Music Mode
+        let musicModeItem = NSMenuItem(title: "🎵 Music Mode", action: #selector(setMusicMode), keyEquivalent: "")
+        musicModeItem.target = self
+        menu.addItem(musicModeItem)
+
         // Audio info labels (added dynamically: Input, Output)
 
         // Audio Mode label (single line: "Mode: value")
@@ -162,22 +181,6 @@ class StatusBarController: NSObject {
         menu.addItem(videoSectionLabel)
 
         // Video info labels (added dynamically: Input, Output)
-
-        muteItem = NSMenuItem(title: "🔇 Mute", action: #selector(toggleMute), keyEquivalent: "")
-        muteItem.target = self
-        menu.addItem(muteItem)
-
-        let receiverPowerOffItem = NSMenuItem(
-            title: "🔴 Power Off",
-            action: #selector(receiverPowerOff),
-            keyEquivalent: ""
-        )
-        receiverPowerOffItem.target = self
-        menu.addItem(receiverPowerOffItem)
-
-        let musicModeItem = NSMenuItem(title: "🎵 Music Mode", action: #selector(setMusicMode), keyEquivalent: "")
-        musicModeItem.target = self
-        menu.addItem(musicModeItem)
 
         // Separator
         menu.addItem(NSMenuItem.separator())
@@ -1016,13 +1019,13 @@ extension StatusBarController: NSMenuDelegate {
                     }
                     self.audioInfoLabels.removeAll()
 
-                    // Add placeholder after volume controls (Audio section + volumeLabel + slider + up + down = +5)
+                    // Add placeholder after volume controls (Audio section + volume + slider + up + down + mute + music = +7)
                     guard let audioSectionIndex = self.menu.items.firstIndex(of: self.audioSectionLabel) else {
                         return
                     }
                     let label = NSMenuItem(title: "Input: --", action: nil, keyEquivalent: "")
                     label.isEnabled = false
-                    self.menu.insertItem(label, at: audioSectionIndex + 5)
+                    self.menu.insertItem(label, at: audioSectionIndex + 7)
                     self.audioInfoLabels.append(label)
                 }
                 return
@@ -1037,11 +1040,11 @@ extension StatusBarController: NSMenuDelegate {
                 }
                 self.audioInfoLabels.removeAll()
 
-                // Find insertion index (after volume controls: Audio section + volumeLabel + slider + up + down = +5)
+                // Find insertion index (after all volume controls: Audio + volume + slider + up + down + mute + music = +7)
                 guard let audioSectionIndex = self.menu.items.firstIndex(of: self.audioSectionLabel) else {
                     return
                 }
-                let insertIndex = audioSectionIndex + 5
+                let insertIndex = audioSectionIndex + 7
 
                 // Add new audio info labels
                 for (index, line) in audioInfoLines.enumerated() {
@@ -1069,7 +1072,7 @@ extension StatusBarController: NSMenuDelegate {
                 }
                 let label = NSMenuItem(title: "Input: --", action: nil, keyEquivalent: "")
                 label.isEnabled = false
-                self.menu.insertItem(label, at: audioSectionIndex + 5)
+                self.menu.insertItem(label, at: audioSectionIndex + 7)
                 self.audioInfoLabels.append(label)
             }
         }
