@@ -247,14 +247,6 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The GitHub Actions workflow automatically:
-1. Runs tests
-2. Builds release
-3. Signs with Apple Developer certificate
-4. Notarizes with Apple
-5. Creates DMG
-6. Publishes GitHub release
-
 ### CI/CD Workflows
 
 The project uses [WarpBuild](https://warpbuild.com) runners for fast macOS CI/CD with intelligent caching.
