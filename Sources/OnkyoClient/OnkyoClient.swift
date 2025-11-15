@@ -86,9 +86,40 @@ public class OnkyoClient {
     }
 
     /// Set listening mode to Music
-    /// - Throws: OnkyoClientError if command fails
+    /// Retries until the listening mode actually changes to Music
+    /// - Throws: OnkyoClientError if command fails after max attempts
     public func setMusicMode() async throws {
-        _ = try await sendCommand("LMD0C", expectingPrefix: "LMD")
+        let maxAttempts = 10
+
+        for attempt in 1...maxAttempts {
+            // Try to set music mode with 2 second timeout
+            do {
+                _ = try await sendCommand("LMD0C", expectingPrefix: "LMD", timeout: 2.0)
+            } catch {
+                // Ignore timeout/connection errors, will retry
+            }
+
+            // Wait a bit for the receiver to process the command
+            try? await Task.sleep(nanoseconds: 200_000_000) // 200ms
+
+            // Verify the listening mode changed
+            do {
+                let currentMode = try await getListeningMode()
+                // Check if mode contains "Music" (case-insensitive)
+                if currentMode.lowercased().contains("music") {
+                    return // Success!
+                }
+            } catch {
+                // Ignore query errors, will retry
+            }
+
+            // If this isn't the last attempt, wait a bit before retrying
+            if attempt < maxAttempts {
+                try? await Task.sleep(nanoseconds: 300_000_000) // 300ms
+            }
+        }
+
+        throw OnkyoClientError.connectionFailed("Failed to set Music mode after \(maxAttempts) attempts")
     }
 
     /// Query current input source from audio information
@@ -312,8 +343,9 @@ public class OnkyoClient {
 
     // MARK: - Private Implementation
 
-    func sendCommand(_ command: String, expectingPrefix: String) async throws -> String {
+    func sendCommand(_ command: String, expectingPrefix: String, timeout: TimeInterval? = nil) async throws -> String {
         let packet = buildPacket(for: command)
+        let timeoutDuration = timeout ?? Self.connectionTimeout
 
         return try await withCheckedThrowingContinuation { continuation in
             let resumed = ResumedFlag()
@@ -345,7 +377,8 @@ public class OnkyoClient {
                 queue: queue,
                 connection: connection,
                 resumed: resumed,
-                continuation: continuation
+                continuation: continuation,
+                timeout: timeoutDuration
             )
         }
     }

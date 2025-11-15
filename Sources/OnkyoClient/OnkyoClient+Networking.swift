@@ -130,9 +130,10 @@ extension OnkyoClient {
         queue: DispatchQueue,
         connection: NWConnection,
         resumed: ResumedFlag,
-        continuation: CheckedContinuation<String, Error>
+        continuation: CheckedContinuation<String, Error>,
+        timeout: TimeInterval
     ) {
-        queue.asyncAfter(deadline: .now() + Self.connectionTimeout) {
+        queue.asyncAfter(deadline: .now() + timeout) {
             if !resumed.value {
                 resumed.value = true
                 connection.cancel()
