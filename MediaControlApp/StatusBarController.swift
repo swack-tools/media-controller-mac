@@ -644,10 +644,10 @@ class StatusBarController: NSObject {
 
     /// Retry a receiver query with exponential backoff
     /// - Parameters:
-    ///   - maxAttempts: Maximum number of attempts (default 5)
+    ///   - maxAttempts: Maximum number of attempts (default 7, volume uses 10)
     ///   - operation: The async operation to retry
     /// - Returns: Result of the operation
-    private func retryQuery<T>(maxAttempts: Int = 5, operation: @escaping () async throws -> T) async throws -> T {
+    private func retryQuery<T>(maxAttempts: Int = 7, operation: @escaping () async throws -> T) async throws -> T {
         var lastError: Error?
 
         for attempt in 1...maxAttempts {
@@ -656,8 +656,8 @@ class StatusBarController: NSObject {
             } catch {
                 lastError = error
                 if attempt < maxAttempts {
-                    // Wait with exponential backoff: 200ms, 400ms, 800ms, 1600ms
-                    let delayNs = UInt64(200_000_000 * (1 << (attempt - 1)))
+                    // Wait with exponential backoff: 250ms, 500ms, 1000ms, 2000ms, 4000ms, etc.
+                    let delayNs = UInt64(250_000_000 * (1 << (attempt - 1)))
                     try? await Task.sleep(nanoseconds: delayNs)
                 }
             }
@@ -979,11 +979,21 @@ extension StatusBarController: NSMenuDelegate {
     /// Update all receiver status information sequentially with retries
     private func updateAllReceiverStatus() {
         Task {
+            // Give receiver time to be ready before first query
+            try? await Task.sleep(nanoseconds: 300_000_000) // 300ms initial delay
+
             // Query sequentially to avoid overwhelming the receiver with simultaneous requests
-            // Each query will retry up to 5 times with exponential backoff
+            // Each query will retry up to 7-10 times with exponential backoff
+            // Add delay between queries to prevent overwhelming receiver
             await updateVolumeDisplayAsync()
+            try? await Task.sleep(nanoseconds: 200_000_000) // 200ms between queries
+
             await updateInputSourceDisplayAsync()
+            try? await Task.sleep(nanoseconds: 200_000_000)
+
             await updateVideoInfoDisplayAsync()
+            try? await Task.sleep(nanoseconds: 200_000_000)
+
             await updateListeningModeDisplayAsync()
         }
     }
@@ -998,7 +1008,8 @@ extension StatusBarController: NSMenuDelegate {
                 }
                 return
             }
-            let volume = try await retryQuery {
+            // Volume query gets extra retries (10 instead of 7) as it's most critical
+            let volume = try await retryQuery(maxAttempts: 10) {
                 try await client.getVolume()
             }
             await MainActor.run {
