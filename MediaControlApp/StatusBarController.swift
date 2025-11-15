@@ -644,10 +644,10 @@ class StatusBarController: NSObject {
 
     /// Retry a receiver query with exponential backoff
     /// - Parameters:
-    ///   - maxAttempts: Maximum number of attempts (default 3)
+    ///   - maxAttempts: Maximum number of attempts (default 5)
     ///   - operation: The async operation to retry
     /// - Returns: Result of the operation
-    private func retryQuery<T>(maxAttempts: Int = 3, operation: @escaping () async throws -> T) async throws -> T {
+    private func retryQuery<T>(maxAttempts: Int = 5, operation: @escaping () async throws -> T) async throws -> T {
         var lastError: Error?
 
         for attempt in 1...maxAttempts {
@@ -656,8 +656,9 @@ class StatusBarController: NSObject {
             } catch {
                 lastError = error
                 if attempt < maxAttempts {
-                    // Wait with exponential backoff: 100ms, 200ms, 400ms
-                    try? await Task.sleep(nanoseconds: UInt64(100_000_000 * (1 << (attempt - 1))))
+                    // Wait with exponential backoff: 200ms, 400ms, 800ms, 1600ms
+                    let delayNs = UInt64(200_000_000 * (1 << (attempt - 1)))
+                    try? await Task.sleep(nanoseconds: delayNs)
                 }
             }
         }
@@ -971,11 +972,146 @@ class StatusBarController: NSObject {
 
 extension StatusBarController: NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
-        // Update volume, input source, video info, and listening mode display when menu opens
-        updateVolumeDisplay()
-        updateInputSourceDisplay()
-        updateVideoInfoDisplay()
-        updateListeningModeDisplay()
+        // Update receiver status sequentially to avoid overwhelming the receiver
+        updateAllReceiverStatus()
+    }
+
+    /// Update all receiver status information sequentially with retries
+    private func updateAllReceiverStatus() {
+        Task {
+            // Query sequentially to avoid overwhelming the receiver with simultaneous requests
+            // Each query will retry up to 5 times with exponential backoff
+            await updateVolumeDisplayAsync()
+            await updateInputSourceDisplayAsync()
+            await updateVideoInfoDisplayAsync()
+            await updateListeningModeDisplayAsync()
+        }
+    }
+
+    /// Async version of updateVolumeDisplay for sequential execution
+    private func updateVolumeDisplayAsync() async {
+        do {
+            guard let client = settings.onkyoClient else {
+                await MainActor.run {
+                    volumeLabel.title = "Volume: --"
+                    volumeSlider.doubleValue = 50
+                }
+                return
+            }
+            let volume = try await retryQuery {
+                try await client.getVolume()
+            }
+            await MainActor.run {
+                self.volumeLabel.title = "Volume: \(volume)"
+                self.volumeSlider.doubleValue = Double(volume)
+            }
+        } catch {
+            await MainActor.run {
+                self.volumeLabel.title = "Volume: --"
+                self.volumeSlider.doubleValue = 50
+            }
+        }
+    }
+
+    /// Async version of updateInputSourceDisplay for sequential execution
+    private func updateInputSourceDisplayAsync() async {
+        do {
+            guard let client = settings.onkyoClient else {
+                await MainActor.run {
+                    inputSourceLabel.title = "Input: --"
+                }
+                return
+            }
+            let inputSource = try await retryQuery {
+                try await client.getInputSource()
+            }
+            await MainActor.run {
+                self.inputSourceLabel.title = "Input: \(inputSource)"
+            }
+        } catch {
+            await MainActor.run {
+                self.inputSourceLabel.title = "Input: --"
+            }
+        }
+    }
+
+    /// Async version of updateVideoInfoDisplay for sequential execution
+    private func updateVideoInfoDisplayAsync() async {
+        do {
+            guard let client = settings.onkyoClient else {
+                await clearVideoInfoLabels()
+                await addVideoInfoLabel("Video: --")
+                return
+            }
+            let videoInfoLines = try await retryQuery {
+                try await client.getVideoInformation()
+            }
+            await MainActor.run {
+                // Clear existing video info labels
+                for label in self.videoInfoLabels {
+                    self.menu.removeItem(label)
+                }
+                self.videoInfoLabels.removeAll()
+
+                // Find insertion index (after input source label)
+                guard let inputIndex = self.menu.items.firstIndex(of: self.inputSourceLabel) else {
+                    return
+                }
+                let insertIndex = inputIndex + 1
+
+                // Add new video info labels
+                for (index, line) in videoInfoLines.enumerated() {
+                    let label = NSMenuItem(
+                        title: index == 0 ? "Video: \(line)" : "  \(line)",
+                        action: nil,
+                        keyEquivalent: ""
+                    )
+                    label.isEnabled = false
+                    self.menu.insertItem(label, at: insertIndex + index)
+                    self.videoInfoLabels.append(label)
+                }
+            }
+        } catch {
+            await MainActor.run {
+                // Clear existing video info labels
+                for label in self.videoInfoLabels {
+                    self.menu.removeItem(label)
+                }
+                self.videoInfoLabels.removeAll()
+
+                // Find insertion index
+                guard let inputIndex = self.menu.items.firstIndex(of: self.inputSourceLabel) else {
+                    return
+                }
+
+                let label = NSMenuItem(title: "Video: --", action: nil, keyEquivalent: "")
+                label.isEnabled = false
+                self.menu.insertItem(label, at: inputIndex + 1)
+                self.videoInfoLabels.append(label)
+            }
+        }
+    }
+
+    /// Async version of updateListeningModeDisplay for sequential execution
+    private func updateListeningModeDisplayAsync() async {
+        do {
+            guard let client = settings.onkyoClient else {
+                await MainActor.run {
+                    listeningModeLabel.title = "Mode: --"
+                }
+                return
+            }
+            let listeningMode = try await retryQuery {
+                try await client.getListeningMode()
+            }
+            await MainActor.run {
+                self.listeningModeLabel.title = "Mode: \(listeningMode)"
+            }
+        } catch {
+            await MainActor.run {
+                self.listeningModeLabel.title = "Mode: --"
+            }
+        }
     }
 }
 
