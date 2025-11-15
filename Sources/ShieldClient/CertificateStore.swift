@@ -32,12 +32,25 @@ public class CertificateStore {
             try deleteCertificate()
         }
 
-        let query: [String: Any] = [
+        // Create access control that allows this app to access without prompting
+        var access: SecAccess?
+        let accessStatus = SecAccessCreate(
+            "MediaControl Shield Certificate" as CFString,
+            nil, // nil = trust this application only
+            &access
+        )
+
+        guard accessStatus == errSecSuccess, let access = access else {
+            throw CertificateStoreError.saveFailed("Failed to create access control: \(accessStatus)")
+        }
+
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
             kSecValueData as String: p12Data,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
+            kSecAttrAccess as String: access
         ]
 
         let status = SecItemAdd(query as CFDictionary, nil)
@@ -100,10 +113,22 @@ public class CertificateStore {
     }
 
     /// Migrate existing certificate to have proper access control
-    /// This updates certificates stored before the kSecAttrAccessible attribute was added
+    /// This updates certificates stored before the kSecAttrAccessible and kSecAttrAccess were added
     public func migrateCertificateAccessControl() throws {
         guard hasCertificate() else {
             return // No certificate to migrate
+        }
+
+        // Create access control that allows this app to access without prompting
+        var access: SecAccess?
+        let accessStatus = SecAccessCreate(
+            "MediaControl Shield Certificate" as CFString,
+            nil, // nil = trust this application only
+            &access
+        )
+
+        guard accessStatus == errSecSuccess, let access = access else {
+            throw CertificateStoreError.migrationFailed("Failed to create access control: \(accessStatus)")
         }
 
         let query: [String: Any] = [
@@ -113,7 +138,8 @@ public class CertificateStore {
         ]
 
         let attributesToUpdate: [String: Any] = [
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
+            kSecAttrAccess as String: access
         ]
 
         let status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
