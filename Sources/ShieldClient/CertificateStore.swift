@@ -36,7 +36,8 @@ public class CertificateStore {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
-            kSecValueData as String: p12Data
+            kSecValueData as String: p12Data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
         ]
 
         let status = SecItemAdd(query as CFDictionary, nil)
@@ -95,6 +96,29 @@ public class CertificateStore {
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw CertificateStoreError.deleteFailed("Keychain delete failed: \(status)")
+        }
+    }
+
+    /// Migrate existing certificate to have proper access control
+    /// This updates certificates stored before the kSecAttrAccessible attribute was added
+    public func migrateCertificateAccessControl() throws {
+        guard hasCertificate() else {
+            return // No certificate to migrate
+        }
+
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+
+        let attributesToUpdate: [String: Any] = [
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
+        ]
+
+        let status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
+        guard status == errSecSuccess else {
+            throw CertificateStoreError.migrationFailed("Failed to update certificate attributes: \(status)")
         }
     }
 }
@@ -157,6 +181,7 @@ public enum CertificateStoreError: LocalizedError {
     case loadFailed(String)
     case deleteFailed(String)
     case generationFailed(String)
+    case migrationFailed(String)
 
     public var errorDescription: String? {
         switch self {
@@ -168,6 +193,8 @@ public enum CertificateStoreError: LocalizedError {
             return "Failed to delete certificate: \(msg)"
         case .generationFailed(let msg):
             return "Failed to generate certificate: \(msg)"
+        case .migrationFailed(let msg):
+            return "Failed to migrate certificate: \(msg)"
         }
     }
 }

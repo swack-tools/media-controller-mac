@@ -46,6 +46,10 @@ class SettingsManager {
     private(set) var onkyoClient: OnkyoClient?
 
     private init() {
+        // Migrate existing certificate to have proper access control
+        // This ensures certificates stored before v1.3.2 get the kSecAttrAccessibleAfterFirstUnlock attribute
+        try? certificateStore.migrateCertificateAccessControl()
+
         // Initialize clients if IPs are configured
         updateShieldClient()
         updateOnkyoClient()

@@ -113,7 +113,7 @@ public class OnkyoClient {
             // Input source is the 1st component (index 0)
             if !components.isEmpty {
                 let inputSource = components[0].trimmingCharacters(in: .whitespaces)
-                return inputSource.isEmpty ? "Unknown" : truncateString(inputSource, maxLength: 25)
+                return inputSource.isEmpty ? "Unknown" : inputSource
             }
         }
         throw OnkyoClientError.invalidResponse
@@ -141,7 +141,7 @@ public class OnkyoClient {
             // Listening mode is typically the 5th component (index 4)
             if components.count > 4 {
                 let listeningMode = components[4].trimmingCharacters(in: .whitespaces)
-                return listeningMode.isEmpty ? "Unknown" : truncateString(listeningMode, maxLength: 25)
+                return listeningMode.isEmpty ? "Unknown" : listeningMode
             }
         }
         throw OnkyoClientError.invalidResponse
@@ -180,60 +180,49 @@ public class OnkyoClient {
     /// - Parameter components: Array of audio info components from receiver
     /// - Returns: Array of formatted lines for display
     private func parseAudioInfo(_ components: [String]) -> [String] {
-        // Components:
-        // [0] Input source (e.g., "HDMI 3") - skip, shown in Input field
-        // [1] Format (e.g., "PCM", "DTS")
-        // [2] Sample rate (e.g., "48 kHz")
-        // [3] Channels (e.g., "2.0 ch")
-        // [4] Listening mode (e.g., "All Ch Stereo") - skip, shown in Mode field
-        // [5+] Additional info (e.g., speaker config)
+        // Components format:
+        // [0] Input source (e.g., "HDMI 3") - ignore, shown in Input field
+        // [1-3] Audio Input: Format, Sample rate, Channels (e.g., "Dolby D +", "48 kHz", "5.1 ch")
+        // [4+] Audio Output: Listening mode, Speaker config (e.g., "All Ch Stereo", "5.0.2 ch")
 
         var lines: [String] = []
-        var details: [String] = []
-        let maxLineLength = 25
 
-        // Skip index 0 (input source) - shown in Input field
-        // Skip index 4 (listening mode) - shown in Mode field
-        // Collect format, sample rate, channels, and any additional info
+        // Build Audio Input section (components 1-3)
+        var inputDetails: [String] = []
         if components.count > 1 {
-            details.append(components[1]) // Format (PCM, DTS, etc.)
+            inputDetails.append(components[1]) // Format (PCM, DTS, Dolby D +, etc.)
         }
         if components.count > 2 {
-            details.append(components[2]) // Sample rate (48 kHz, etc.)
+            inputDetails.append(components[2]) // Sample rate (48 kHz, etc.)
         }
         if components.count > 3 {
-            details.append(components[3]) // Channels (2.0 ch, etc.)
+            inputDetails.append(components[3]) // Channels (2.0 ch, 5.1 ch, etc.)
         }
-        // Add any additional info beyond index 5 (skip index 4 which is listening mode)
-        if components.count > 5 {
-            for index in 5..<components.count {
+
+        if !inputDetails.isEmpty {
+            lines.append("Audio Input:")
+            lines.append(inputDetails.joined(separator: ", "))
+        }
+
+        // Build Audio Output section (components 4+)
+        var outputDetails: [String] = []
+        if components.count > 4 {
+            for index in 4..<components.count {
                 let info = components[index].trimmingCharacters(in: .whitespaces)
                 if !info.isEmpty {
-                    details.append(info)
+                    outputDetails.append(info)
                 }
             }
         }
 
-        // Build lines with max length constraint
-        if !details.isEmpty {
-            var currentLine = ""
-            for detail in details {
-                if currentLine.isEmpty {
-                    currentLine = detail
-                } else if (currentLine + " " + detail).count <= maxLineLength {
-                    currentLine += " " + detail
-                } else {
-                    lines.append(currentLine)
-                    currentLine = detail
-                }
-            }
-            if !currentLine.isEmpty {
-                lines.append(currentLine)
-            }
+        if !outputDetails.isEmpty {
+            lines.append("Audio Output:")
+            lines.append(outputDetails.joined(separator: ", "))
         }
 
         return lines.isEmpty ? ["Unknown"] : lines
     }
+
 
     /// Query current video information
     /// - Returns: Array of video information lines for display
@@ -264,81 +253,52 @@ public class OnkyoClient {
     /// - Returns: Array of formatted lines for display
     private func parseVideoInfo(_ rawInfo: String) -> [String] {
         // Split by comma to get components
+        // Format: HDMI 3,1920 x 1080p  59 Hz,RGB,24bit,MAIN,1920 x 1080p  59 Hz,RGB,24bit,,
+        // [0] = Input port (skip)
+        // [1-3] = Video Input: resolution+Hz, color space, bit depth
+        // [4] = Mode/marker
+        // [5-7] = Video Output: resolution+Hz, color space, bit depth
         let parts = rawInfo.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
 
         var lines: [String] = []
-        var resolution = ""
-        var details: [String] = []
-        let maxLineLength = 25
 
-        for part in parts {
-            // Skip HDMI port information as it's shown in Input field
-            // This includes "HDMI", "HDMI 1", "HDMI 2", etc.
-            if part.uppercased().hasPrefix("HDMI") {
-                continue
-            }
-
-            // Parse resolution
-            if part.contains("x") {
-                // Extract resolution like "1920x1080p" -> "1080p" or "3840x2160p" -> "4K"
-                if let match = part.range(of: #"(\d+)x(\d+)([pi]?)"#, options: .regularExpression) {
-                    let resString = String(part[match])
-                    if resString.contains("3840x2160") || resString.contains("4096x2160") {
-                        resolution = "4K" + (resString.hasSuffix("i") ? "i" : "")
-                    } else if resString.contains("1920x1080") {
-                        resolution = "1080" + (resString.hasSuffix("i") ? "i" : "p")
-                    } else if resString.contains("1280x720") {
-                        resolution = "720p"
-                    } else if resString.contains("2560x1440") {
-                        resolution = "1440p"
-                    } else {
-                        resolution = resString
-                    }
-                }
-            } else if !part.isEmpty {
-                // Add other details (HDR, color space, frame rate, etc.)
-                details.append(part)
-            }
+        // Build Video Input section (components 1-3)
+        var inputDetails: [String] = []
+        if parts.count > 1 && !parts[1].isEmpty && !parts[1].uppercased().hasPrefix("HDMI") {
+            inputDetails.append(parts[1]) // Resolution + Hz
+        }
+        if parts.count > 2 && !parts[2].isEmpty {
+            inputDetails.append(parts[2]) // Color space (RGB, etc.)
+        }
+        if parts.count > 3 && !parts[3].isEmpty {
+            inputDetails.append(parts[3]) // Bit depth (24bit, etc.)
         }
 
-        // Build display lines
-        if !resolution.isEmpty {
-            lines.append(resolution)
+        if !inputDetails.isEmpty {
+            lines.append("Video Input:")
+            lines.append(inputDetails.joined(separator: ", "))
         }
 
-        // Group details into lines of reasonable length
-        if !details.isEmpty {
-            var currentLine = ""
-            for detail in details {
-                if currentLine.isEmpty {
-                    currentLine = detail
-                } else if (currentLine + " " + detail).count <= maxLineLength {
-                    currentLine += " " + detail
-                } else {
-                    lines.append(currentLine)
-                    currentLine = detail
-                }
-            }
-            if !currentLine.isEmpty {
-                lines.append(currentLine)
-            }
+        // Build Video Output section (components 5-7, skipping component 4 which is mode/marker)
+        var outputDetails: [String] = []
+        if parts.count > 5 && !parts[5].isEmpty {
+            outputDetails.append(parts[5]) // Resolution + Hz
+        }
+        if parts.count > 6 && !parts[6].isEmpty {
+            outputDetails.append(parts[6]) // Color space (RGB, etc.)
+        }
+        if parts.count > 7 && !parts[7].isEmpty {
+            outputDetails.append(parts[7]) // Bit depth (24bit, etc.)
+        }
+
+        if !outputDetails.isEmpty {
+            lines.append("Video Output:")
+            lines.append(outputDetails.joined(separator: ", "))
         }
 
         return lines.isEmpty ? [rawInfo] : lines
     }
 
-    /// Truncate string with ellipsis if needed
-    /// - Parameters:
-    ///   - string: String to truncate
-    ///   - maxLength: Maximum length before truncation
-    /// - Returns: Truncated string with ellipsis if over maxLength
-    private func truncateString(_ string: String, maxLength: Int) -> String {
-        if string.count > maxLength {
-            let index = string.index(string.startIndex, offsetBy: maxLength - 3)
-            return String(string[..<index]) + "..."
-        }
-        return string
-    }
 
     /// Query current mute state
     /// - Returns: True if muted, false otherwise
