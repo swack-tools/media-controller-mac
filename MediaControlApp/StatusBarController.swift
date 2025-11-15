@@ -113,6 +113,15 @@ class StatusBarController: NSObject {
         // Receiver section
         menu.addItem(NSMenuItem.sectionHeader(title: "Receiver"))
 
+        // Power On
+        let receiverPowerOnItem = NSMenuItem(
+            title: "🟢 Power On",
+            action: #selector(receiverPowerOn),
+            keyEquivalent: ""
+        )
+        receiverPowerOnItem.target = self
+        menu.addItem(receiverPowerOnItem)
+
         // Power Off
         let receiverPowerOffItem = NSMenuItem(
             title: "🔴 Power Off",
@@ -600,6 +609,21 @@ class StatusBarController: NSObject {
         }
     }
 
+    @objc private func receiverPowerOn() {
+        Task {
+            do {
+                guard let client = settings.onkyoClient else {
+                    NotificationManager.shared.showError(device: "Receiver", message: "Not configured")
+                    return
+                }
+                try await client.powerOn()
+                NotificationManager.shared.showSuccess(device: "Receiver", message: "Power on sent")
+            } catch {
+                NotificationManager.shared.showError(device: "Receiver", message: error.localizedDescription)
+            }
+        }
+    }
+
     @objc private func receiverPowerOff() {
         Task {
             do {
@@ -795,7 +819,11 @@ class StatusBarController: NSObject {
     @objc private func showAbout() {
         let alert = NSAlert()
         alert.messageText = "MediaControl"
-        alert.informativeText = "Version 1.0\n\nUnified control for Shield TV and Onkyo receivers"
+
+        // Get version from Info.plist
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+
+        alert.informativeText = "Version \(version)\n\nUnified control for Shield TV and Onkyo receivers"
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
         alert.runModal()
