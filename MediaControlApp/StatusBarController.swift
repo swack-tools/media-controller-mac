@@ -243,11 +243,13 @@ class StatusBarController: NSObject {
             action: #selector(volumeSliderChanged)
         )
         volumeSlider.frame = NSRect(x: 20, y: 5, width: 200, height: 20)
+        volumeSlider.isEnabled = true
 
         sliderView.addSubview(volumeSlider)
 
         let sliderItem = NSMenuItem()
         sliderItem.view = sliderView
+        sliderItem.isEnabled = true
         menu.addItem(sliderItem)
     }
 
