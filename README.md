@@ -255,6 +255,76 @@ The GitHub Actions workflow automatically:
 5. Creates DMG
 6. Publishes GitHub release
 
+### CI/CD Workflows
+
+The project uses [WarpBuild](https://warpbuild.com) runners for fast macOS CI/CD with intelligent caching.
+
+#### Test Workflow (`.github/workflows/test.yml`)
+
+Runs automatically on:
+- Pushes to `main` and `develop` branches
+- All pull requests
+
+**What it does:**
+1. Restores cached dependencies
+2. Installs Homebrew packages (xcodegen, just)
+3. Runs test suite (`just test`)
+
+**Cache strategy:**
+- **Homebrew downloads**: `~/Library/Caches/Homebrew` (~50-200MB)
+- **Swift PM builds**: `.build` directory + generated Xcode project (~10-50MB)
+- First run populates cache, subsequent runs restore instantly
+
+#### Release Workflow (`.github/workflows/release.yml`)
+
+Runs automatically on:
+- Git tags matching `v*` (e.g., `v1.0.0`)
+
+**What it does:**
+1. Restores cached dependencies
+2. Runs tests
+3. Builds release with code signing
+4. Notarizes with Apple
+5. Creates DMG
+6. Publishes GitHub release with artifacts
+
+**Cache strategy:**
+Same as test workflow, plus caches notarization results between attempts.
+
+#### WarpBuild Cache Configuration
+
+Both workflows use [WarpBuilds/cache@v1](https://github.com/WarpBuilds/cache) for optimal performance:
+
+```yaml
+# Homebrew downloads (bottles/sources)
+- uses: WarpBuilds/cache@v1
+  with:
+    path: ~/Library/Caches/Homebrew
+    key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/*.yml') }}
+    restore-keys: |
+      ${{ runner.os }}-brew-
+
+# Swift Package Manager builds
+- uses: WarpBuilds/cache@v1
+  with:
+    path: |
+      .build
+      MediaControl.xcodeproj
+    key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved', 'Package.swift', 'project.yml') }}
+    restore-keys: |
+      ${{ runner.os }}-spm-
+```
+
+**Benefits:**
+- Unlimited cache storage (vs GitHub's 10GB limit)
+- Faster Homebrew installations with cached bottles
+- Reuses Swift build artifacts across workflow runs
+- Shared cache between test and release workflows
+
+**Performance:**
+- First run: ~3-5 minutes (cache miss)
+- Subsequent runs: ~1-2 minutes (cache hit)
+
 ## ❓ Troubleshooting
 
 ### Shield TV Issues
