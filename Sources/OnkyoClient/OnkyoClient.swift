@@ -200,8 +200,7 @@ public class OnkyoClient {
         }
 
         if !inputDetails.isEmpty {
-            lines.append("Audio Input:")
-            lines.append(inputDetails.joined(separator: ", "))
+            lines.append("Input: " + inputDetails.joined(separator: ", "))
         }
 
         // Build Audio Output section (components 4+)
@@ -216,8 +215,7 @@ public class OnkyoClient {
         }
 
         if !outputDetails.isEmpty {
-            lines.append("Audio Output:")
-            lines.append(outputDetails.joined(separator: ", "))
+            lines.append("Output: " + outputDetails.joined(separator: ", "))
         }
 
         return lines.isEmpty ? ["Unknown"] : lines
@@ -275,8 +273,7 @@ public class OnkyoClient {
         }
 
         if !inputDetails.isEmpty {
-            lines.append("Video Input:")
-            lines.append(inputDetails.joined(separator: ", "))
+            lines.append("Input: " + inputDetails.joined(separator: ", "))
         }
 
         // Build Video Output section (components 5-7, skipping component 4 which is mode/marker)
@@ -292,8 +289,7 @@ public class OnkyoClient {
         }
 
         if !outputDetails.isEmpty {
-            lines.append("Video Output:")
-            lines.append(outputDetails.joined(separator: ", "))
+            lines.append("Output: " + outputDetails.joined(separator: ", "))
         }
 
         return lines.isEmpty ? [rawInfo] : lines
