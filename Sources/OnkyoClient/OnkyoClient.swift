@@ -97,6 +97,11 @@ public class OnkyoClient {
                 // Try to advance to next listening mode with 2 second timeout
                 // LMDUP advances to the next listening mode (cycles through all modes)
                 _ = try await sendCommand("LMDUP", expectingPrefix: "LMD", timeout: 2.0)
+
+                // Wait for receiver to process the mode change before returning
+                // This ensures subsequent status queries get the updated mode
+                try? await Task.sleep(nanoseconds: 500_000_000) // 500ms
+
                 return // Success!
             } catch {
                 lastError = error
