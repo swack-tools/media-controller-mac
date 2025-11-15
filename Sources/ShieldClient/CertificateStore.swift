@@ -114,38 +114,34 @@ public class CertificateStore {
 
     /// Migrate existing certificate to have proper access control
     /// This updates certificates stored before the kSecAttrAccessible and kSecAttrAccess were added
+    /// Note: This requires reading the certificate data, which may prompt for password once.
+    /// After clicking "Always Allow", future accesses will not prompt.
     public func migrateCertificateAccessControl() throws {
         guard hasCertificate() else {
             return // No certificate to migrate
         }
 
-        // Create access control that allows this app to access without prompting
-        var access: SecAccess?
-        let accessStatus = SecAccessCreate(
-            "MediaControl Shield Certificate" as CFString,
-            nil, // nil = trust this application only
-            &access
-        )
-
-        guard accessStatus == errSecSuccess, let access = access else {
-            throw CertificateStoreError.migrationFailed("Failed to create access control: \(accessStatus)")
-        }
-
+        // Read the existing certificate data
+        // This may prompt for password on first run - user should click "Always Allow"
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: account
+            kSecAttrAccount as String: account,
+            kSecReturnData as String: true
         ]
 
-        let attributesToUpdate: [String: Any] = [
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
-            kSecAttrAccess as String: access
-        ]
+        var result: AnyObject?
+        let readStatus = SecItemCopyMatching(query as CFDictionary, &result)
 
-        let status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
-        guard status == errSecSuccess else {
-            throw CertificateStoreError.migrationFailed("Failed to update certificate attributes: \(status)")
+        guard readStatus == errSecSuccess, let p12Data = result as? Data else {
+            // If we can't read it, user needs to click "Always Allow" when prompted
+            // Don't throw error - just skip migration this time
+            return
         }
+
+        // Successfully read the data - now delete and recreate with proper access control
+        try deleteCertificate()
+        try saveCertificate(p12Data: p12Data)
     }
 }
 
