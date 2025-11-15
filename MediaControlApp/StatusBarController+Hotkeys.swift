@@ -62,8 +62,8 @@ extension StatusBarController {
 
             // Check for Command modifier and F7 key (keycode 98)
             if flags.contains(.maskCommand) && keyCode == 98 {
-                NSLog("StatusBarController: Command+F7 (Shield Previous) detected")
-                shieldSkipPrevious()
+                NSLog("StatusBarController: Command+F7 (Shield Rewind) detected")
+                shieldRewind()
                 // Don't pass through to system - consume the event
                 return nil
             }
@@ -78,8 +78,8 @@ extension StatusBarController {
 
             // Check for Command modifier and F9 key (keycode 101)
             if flags.contains(.maskCommand) && keyCode == 101 {
-                NSLog("StatusBarController: Command+F9 (Shield Next) detected")
-                shieldSkipNext()
+                NSLog("StatusBarController: Command+F9 (Shield Fast Forward) detected")
+                shieldFastForward()
                 // Don't pass through to system - consume the event
                 return nil
             }
@@ -109,11 +109,29 @@ extension StatusBarController {
 
     private func handleMediaKeyPress(keyCode: Int, event: CGEvent) -> Unmanaged<CGEvent>? {
         switch keyCode {
+        case 20: // F7/Previous media key - only with Command modifier
+            let flags = event.flags
+            if flags.contains(.maskCommand) {
+                NSLog("StatusBarController: Command+F7 (Shield Rewind) detected")
+                shieldRewind()
+                // Don't pass through - consume the event
+                return nil
+            }
+
         case 16: // F8/Play-Pause media key - only with Command modifier
             let flags = event.flags
             if flags.contains(.maskCommand) {
                 NSLog("StatusBarController: Command+F8 (Shield Play/Pause) detected")
                 shieldPlayPause()
+                // Don't pass through - consume the event
+                return nil
+            }
+
+        case 19: // F9/Next media key - only with Command modifier
+            let flags = event.flags
+            if flags.contains(.maskCommand) {
+                NSLog("StatusBarController: Command+F9 (Shield Fast Forward) detected")
+                shieldFastForward()
                 // Don't pass through - consume the event
                 return nil
             }

@@ -7,7 +7,7 @@ Control your home theater setup directly from your Mac's menu bar with convenien
 <p align="center">
   <img src="https://img.shields.io/badge/platform-macOS%2013.0+-blue" alt="Platform">
   <img src="https://img.shields.io/badge/swift-5.0-orange" alt="Swift">
-  <img src="https://img.shields.io/badge/version-1.3.0-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.4.0-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
 </p>
 
@@ -16,7 +16,9 @@ Control your home theater setup directly from your Mac's menu bar with convenien
 | Hotkey | Action | Device |
 |--------|--------|--------|
 | **Command+;** | Cycle listening modes | Receiver |
+| **Command+F7** | Rewind | Shield TV |
 | **Command+F8** | Play/Pause | Shield TV |
+| **Command+F9** | Fast Forward | Shield TV |
 | **F10** | Mute toggle | Receiver + System |
 | **F11** | Volume down | Receiver + System |
 | **F12** | Volume up | Receiver + System |
@@ -26,7 +28,9 @@ Control your home theater setup directly from your Mac's menu bar with convenien
 ## ✨ Features
 
 ### 🎮 Nvidia Shield TV Control
-- **Play/pause media** via Command+F8
+- **Command+F7**: Rewind
+- **Command+F8**: Play/pause media
+- **Command+F9**: Fast forward
 - Secure pairing using Android TV Remote Protocol v2
 - TLS-encrypted communication with client certificates
 - Credentials stored securely in macOS Keychain
@@ -119,7 +123,9 @@ To use keyboard shortcuts:
 | Hotkey | Action | Device |
 |--------|--------|--------|
 | **Command+;** | Cycle listening modes | Receiver |
+| **Command+F7** | Rewind | Shield TV |
 | **Command+F8** | Play/Pause | Shield TV |
+| **Command+F9** | Fast Forward | Shield TV |
 | **F10** | Mute toggle | Receiver + System |
 | **F11** | Volume down | Receiver + System |
 | **F12** | Volume up | Receiver + System |

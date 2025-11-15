@@ -74,6 +74,24 @@ public class ShieldClient {
         try await sendKeyCommand(keyCode: KeyCode.mediaPrevious.rawValue)
     }
 
+    /// Fast forward on Shield TV (like holding >> button)
+    /// - Throws: ShieldClientError if not paired or command fails
+    public func fastForward() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.mediaFastForward.rawValue)
+    }
+
+    /// Rewind on Shield TV (like holding << button)
+    /// - Throws: ShieldClientError if not paired or command fails
+    public func rewind() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.mediaRewind.rawValue)
+    }
+
     /// Wake up Shield TV (power on if sleeping)
     /// - Throws: ShieldClientError if not paired or command fails
     public func wakeUp() async throws {

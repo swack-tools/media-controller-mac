@@ -13,6 +13,8 @@ enum KeyCode: UInt32 {
     case mediaStop = 86
     case mediaNext = 87
     case mediaPrevious = 88
+    case mediaRewind = 89
+    case mediaFastForward = 90
     case volumeUp = 24
     case volumeDown = 25
     case mute = 91
