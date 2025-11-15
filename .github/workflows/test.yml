@@ -15,24 +15,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache Homebrew packages
+      - name: Cache Homebrew downloads
         uses: WarpBuilds/cache@v1
         with:
-          path: |
-            ~/Library/Caches/Homebrew
-            /opt/homebrew/Cellar/xcodegen
-            /opt/homebrew/Cellar/just
+          path: ~/Library/Caches/Homebrew
           key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/test.yml') }}
           restore-keys: |
             ${{ runner.os }}-brew-
 
-      - name: Cache Swift PM dependencies
+      - name: Cache Swift PM
         uses: WarpBuilds/cache@v1
         with:
           path: |
-            ~/Library/Caches/org.swift.swiftpm
-            ~/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved', 'Package.swift') }}
+            .build
+            MediaControl.xcodeproj
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved', 'Package.swift', 'project.yml') }}
           restore-keys: |
             ${{ runner.os }}-spm-
 
