@@ -95,8 +95,8 @@ public class OnkyoClient {
         for attempt in 1...maxAttempts {
             do {
                 // Try to set music mode with 2 second timeout
-                // LMD12 is the "Music" listening mode (like pressing Music button on remote)
-                _ = try await sendCommand("LMD12", expectingPrefix: "LMD", timeout: 2.0)
+                // LMD80 cycles through music-optimized listening modes (like Music button on remote)
+                _ = try await sendCommand("LMD80", expectingPrefix: "LMD", timeout: 2.0)
                 return // Success!
             } catch {
                 lastError = error
