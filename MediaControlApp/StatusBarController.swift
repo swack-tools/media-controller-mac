@@ -113,14 +113,6 @@ class StatusBarController: NSObject {
         // Receiver section
         menu.addItem(NSMenuItem.sectionHeader(title: "Receiver"))
 
-        // Volume label
-        volumeLabel = NSMenuItem(title: "Volume: --", action: nil, keyEquivalent: "")
-        volumeLabel.isEnabled = false
-        menu.addItem(volumeLabel)
-
-        // Volume slider
-        setupVolumeSlider()
-
         // Input source label
         inputSourceLabel = NSMenuItem(title: "Input: --", action: nil, keyEquivalent: "")
         inputSourceLabel.isEnabled = false
@@ -134,6 +126,24 @@ class StatusBarController: NSObject {
         audioSectionLabel = NSMenuItem(title: "Audio", action: nil, keyEquivalent: "")
         audioSectionLabel.isEnabled = false
         menu.addItem(audioSectionLabel)
+
+        // Volume label (enabled)
+        volumeLabel = NSMenuItem(title: "Volume: --", action: nil, keyEquivalent: "")
+        volumeLabel.isEnabled = true
+        menu.addItem(volumeLabel)
+
+        // Volume slider
+        setupVolumeSlider()
+
+        // Volume Up
+        let volumeUpItem = NSMenuItem(title: "Volume Up (+5)", action: #selector(volumeUp), keyEquivalent: "")
+        volumeUpItem.target = self
+        menu.addItem(volumeUpItem)
+
+        // Volume Down
+        let volumeDownItem = NSMenuItem(title: "Volume Down (-5)", action: #selector(volumeDown), keyEquivalent: "")
+        volumeDownItem.target = self
+        menu.addItem(volumeDownItem)
 
         // Audio info labels (added dynamically: Input, Output)
 
@@ -152,14 +162,6 @@ class StatusBarController: NSObject {
         menu.addItem(videoSectionLabel)
 
         // Video info labels (added dynamically: Input, Output)
-
-        let volumeUpItem = NSMenuItem(title: "Volume Up (+5)", action: #selector(volumeUp), keyEquivalent: "")
-        volumeUpItem.target = self
-        menu.addItem(volumeUpItem)
-
-        let volumeDownItem = NSMenuItem(title: "Volume Down (-5)", action: #selector(volumeDown), keyEquivalent: "")
-        volumeDownItem.target = self
-        menu.addItem(volumeDownItem)
 
         muteItem = NSMenuItem(title: "🔇 Mute", action: #selector(toggleMute), keyEquivalent: "")
         muteItem.target = self
@@ -1014,13 +1016,13 @@ extension StatusBarController: NSMenuDelegate {
                     }
                     self.audioInfoLabels.removeAll()
 
-                    // Add placeholder after Audio section header
+                    // Add placeholder after volume controls (Audio section + volumeLabel + slider + up + down = +5)
                     guard let audioSectionIndex = self.menu.items.firstIndex(of: self.audioSectionLabel) else {
                         return
                     }
                     let label = NSMenuItem(title: "Input: --", action: nil, keyEquivalent: "")
                     label.isEnabled = false
-                    self.menu.insertItem(label, at: audioSectionIndex + 1)
+                    self.menu.insertItem(label, at: audioSectionIndex + 5)
                     self.audioInfoLabels.append(label)
                 }
                 return
@@ -1035,11 +1037,11 @@ extension StatusBarController: NSMenuDelegate {
                 }
                 self.audioInfoLabels.removeAll()
 
-                // Find insertion index (after Audio section header)
+                // Find insertion index (after volume controls: Audio section + volumeLabel + slider + up + down = +5)
                 guard let audioSectionIndex = self.menu.items.firstIndex(of: self.audioSectionLabel) else {
                     return
                 }
-                let insertIndex = audioSectionIndex + 1
+                let insertIndex = audioSectionIndex + 5
 
                 // Add new audio info labels
                 for (index, line) in audioInfoLines.enumerated() {
@@ -1061,13 +1063,13 @@ extension StatusBarController: NSMenuDelegate {
                 }
                 self.audioInfoLabels.removeAll()
 
-                // Add error placeholder after Audio section header
+                // Add error placeholder after volume controls
                 guard let audioSectionIndex = self.menu.items.firstIndex(of: self.audioSectionLabel) else {
                     return
                 }
                 let label = NSMenuItem(title: "Input: --", action: nil, keyEquivalent: "")
                 label.isEnabled = false
-                self.menu.insertItem(label, at: audioSectionIndex + 1)
+                self.menu.insertItem(label, at: audioSectionIndex + 5)
                 self.audioInfoLabels.append(label)
             }
         }
