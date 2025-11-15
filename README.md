@@ -7,7 +7,7 @@ Control your home theater setup directly from your Mac's menu bar with convenien
 <p align="center">
   <img src="https://img.shields.io/badge/platform-macOS%2013.0+-blue" alt="Platform">
   <img src="https://img.shields.io/badge/swift-5.0-orange" alt="Swift">
-  <img src="https://img.shields.io/badge/version-1.4.0-brightgreen" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.4.1-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
 </p>
 
