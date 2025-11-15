@@ -925,6 +925,15 @@ class StatusBarController: NSObject {
                 // Only handle key down events
                 if keyPressed {
                     switch keyCode {
+                    case 16: // F8/Play-Pause media key - only with Command modifier
+                        let flags = event.flags
+                        if flags.contains(.maskCommand) {
+                            NSLog("StatusBarController: Command+F8 (Shield Play/Pause) detected")
+                            shieldPlayPause()
+                            // Don't pass through - consume the event
+                            return nil
+                        }
+
                     case 7: // F10 - Mute
                         NSLog("StatusBarController: F10 (Mute) detected")
                         toggleMute()
