@@ -85,7 +85,7 @@ public class OnkyoClient {
         _ = try await sendCommand("PWR01", expectingPrefix: "PWR")
     }
 
-    /// Set listening mode to Music (cycles through music-optimized modes)
+    /// Cycle to next listening mode
     /// Retries the command if it times out
     /// - Throws: OnkyoClientError if command fails after max attempts
     public func setMusicMode() async throws {
@@ -94,9 +94,9 @@ public class OnkyoClient {
 
         for attempt in 1...maxAttempts {
             do {
-                // Try to set music mode with 2 second timeout
-                // LMD80 cycles through music-optimized listening modes (like Music button on remote)
-                _ = try await sendCommand("LMD80", expectingPrefix: "LMD", timeout: 2.0)
+                // Try to advance to next listening mode with 2 second timeout
+                // LMDUP advances to the next listening mode (cycles through all modes)
+                _ = try await sendCommand("LMDUP", expectingPrefix: "LMD", timeout: 2.0)
                 return // Success!
             } catch {
                 lastError = error
@@ -108,7 +108,7 @@ public class OnkyoClient {
         }
 
         // If we get here, all attempts failed
-        throw lastError ?? OnkyoClientError.connectionFailed("Failed to set Music mode after \(maxAttempts) attempts")
+        throw lastError ?? OnkyoClientError.connectionFailed("Failed to cycle listening mode after \(maxAttempts) attempts")
     }
 
     /// Query current input source from audio information
