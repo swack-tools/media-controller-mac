@@ -80,7 +80,7 @@ class StatusBarController: NSObject {
         // Shield TV section
         menu.addItem(NSMenuItem.sectionHeader(title: "Shield TV"))
 
-        let powerOnItem = NSMenuItem(title: "⚡️ Power On", action: #selector(shieldPowerOn), keyEquivalent: "")
+        let powerOnItem = NSMenuItem(title: "🟢 Power On", action: #selector(shieldPowerOn), keyEquivalent: "")
         powerOnItem.target = self
         menu.addItem(powerOnItem)
 
