@@ -7,8 +7,21 @@ Control your home theater setup directly from your Mac's menu bar with convenien
 <p align="center">
   <img src="https://img.shields.io/badge/platform-macOS%2013.0+-blue" alt="Platform">
   <img src="https://img.shields.io/badge/swift-5.0-orange" alt="Swift">
+  <img src="https://img.shields.io/badge/version-1.3.0-brightgreen" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
 </p>
+
+## ⌨️ Keyboard Shortcuts
+
+| Hotkey | Action | Device |
+|--------|--------|--------|
+| **Command+;** | Cycle listening modes | Receiver |
+| **Command+F8** | Play/Pause | Shield TV |
+| **F10** | Mute toggle | Receiver + System |
+| **F11** | Volume down | Receiver + System |
+| **F12** | Volume up | Receiver + System |
+
+> 💡 All shortcuts work globally across macOS - no need to switch to MediaControl first!
 
 ## ✨ Features
 
@@ -19,10 +32,12 @@ Control your home theater setup directly from your Mac's menu bar with convenien
 - Credentials stored securely in macOS Keychain
 
 ### 🔊 Onkyo/Integra Receiver Control
+- **Command+;**: Cycle through listening modes (Music, TV Logic, Dolby Surround, etc.)
 - **F10**: Mute toggle (syncs with system audio)
 - **F11**: Volume down (syncs with system volume)
 - **F12**: Volume up (syncs with system volume)
 - Real-time volume slider with live feedback
+- Audio/Video information display with input/output details
 - Supports all Onkyo/Integra receivers with eISCP network protocol
 
 ### ⚙️ Additional Features
@@ -103,12 +118,14 @@ To use keyboard shortcuts:
 
 | Hotkey | Action | Device |
 |--------|--------|--------|
+| **Command+;** | Cycle listening modes | Receiver |
 | **Command+F8** | Play/Pause | Shield TV |
 | **F10** | Mute toggle | Receiver + System |
 | **F11** | Volume down | Receiver + System |
 | **F12** | Volume up | Receiver + System |
 
 > ⚠️ F10-F12 control both receiver and Mac system volume to keep them synchronized.
+> 💡 Command+; cycles through receiver listening modes (Music, TV Logic, Dolby Surround, etc.)
 
 ## 🏗️ Architecture
 
