@@ -316,7 +316,7 @@ public class OnkyoClient {
         let packet = buildPacket(for: command)
 
         return try await withCheckedThrowingContinuation { continuation in
-            var resumed = false
+            let resumed = ResumedFlag()
             let queue = DispatchQueue(label: "onkyo.\(UUID().uuidString)")
 
             let connection = createConnection()
@@ -325,7 +325,7 @@ public class OnkyoClient {
             let readHandler = createReadHandler(
                 connection: connection,
                 expectingPrefix: expectingPrefix,
-                resumed: &resumed,
+                resumed: resumed,
                 continuation: continuation
             )
 
@@ -333,7 +333,7 @@ public class OnkyoClient {
             setupConnectionStateHandler(
                 connection: connection,
                 packet: packet,
-                resumed: &resumed,
+                resumed: resumed,
                 continuation: continuation,
                 readHandler: readHandler
             )
@@ -344,7 +344,7 @@ public class OnkyoClient {
             setupTimeout(
                 queue: queue,
                 connection: connection,
-                resumed: &resumed,
+                resumed: resumed,
                 continuation: continuation
             )
         }

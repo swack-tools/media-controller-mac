@@ -4,6 +4,10 @@ import Network
 // MARK: - Networking Helpers
 
 extension OnkyoClient {
+    class ResumedFlag {
+        var value = false
+    }
+
     func createConnection() -> NWConnection {
         return NWConnection(
             host: NWEndpoint.Host(host),
@@ -15,7 +19,7 @@ extension OnkyoClient {
     func createReadHandler(
         connection: NWConnection,
         expectingPrefix: String,
-        resumed: UnsafeMutablePointer<Bool>,
+        resumed: ResumedFlag,
         continuation: CheckedContinuation<String, Error>
     ) -> () -> Void {
         func readNextResponse() {
@@ -41,8 +45,8 @@ extension OnkyoClient {
         // Read eISCP header (16 bytes)
         connection.receive(minimumIncompleteLength: 16, maximumLength: 16) { headerData, _, _, headerError in
             guard headerError == nil, let headerData = headerData, headerData.count == 16 else {
-                if !context.resumed.pointee {
-                    context.resumed.pointee = true
+                if !context.resumed.value {
+                    context.resumed.value = true
                     connection.cancel()
                     context.continuation.resume(throwing: OnkyoClientError.connectionFailed("Header read failed"))
                 }
@@ -69,8 +73,8 @@ extension OnkyoClient {
             guard error == nil,
                   let messageData = messageData,
                   let responseString = String(data: messageData, encoding: .utf8) else {
-                if !context.resumed.pointee {
-                    context.resumed.pointee = true
+                if !context.resumed.value {
+                    context.resumed.value = true
                     connection.cancel()
                     context.continuation.resume(throwing: OnkyoClientError.invalidResponse)
                 }
@@ -78,8 +82,8 @@ extension OnkyoClient {
             }
 
             if responseString.contains(expectingPrefix) {
-                if !context.resumed.pointee {
-                    context.resumed.pointee = true
+                if !context.resumed.value {
+                    context.resumed.value = true
                     connection.cancel()
                     context.continuation.resume(returning: responseString)
                 }
@@ -92,7 +96,7 @@ extension OnkyoClient {
     func setupConnectionStateHandler(
         connection: NWConnection,
         packet: Data,
-        resumed: UnsafeMutablePointer<Bool>,
+        resumed: ResumedFlag,
         continuation: CheckedContinuation<String, Error>,
         readHandler: @escaping () -> Void
     ) {
@@ -101,8 +105,8 @@ extension OnkyoClient {
             case .ready:
                 connection.send(content: packet, completion: .contentProcessed { error in
                     if let error = error {
-                        if !resumed.pointee {
-                            resumed.pointee = true
+                        if !resumed.value {
+                            resumed.value = true
                             connection.cancel()
                             continuation.resume(throwing: OnkyoClientError.connectionFailed(error.localizedDescription))
                         }
@@ -111,8 +115,8 @@ extension OnkyoClient {
                     }
                 })
             case .failed(let error), .waiting(let error):
-                if !resumed.pointee {
-                    resumed.pointee = true
+                if !resumed.value {
+                    resumed.value = true
                     connection.cancel()
                     continuation.resume(throwing: OnkyoClientError.connectionFailed(error.localizedDescription))
                 }
@@ -125,12 +129,12 @@ extension OnkyoClient {
     func setupTimeout(
         queue: DispatchQueue,
         connection: NWConnection,
-        resumed: UnsafeMutablePointer<Bool>,
+        resumed: ResumedFlag,
         continuation: CheckedContinuation<String, Error>
     ) {
         queue.asyncAfter(deadline: .now() + Self.connectionTimeout) {
-            if !resumed.pointee {
-                resumed.pointee = true
+            if !resumed.value {
+                resumed.value = true
                 connection.cancel()
                 continuation.resume(throwing: OnkyoClientError.timeout)
             }
@@ -138,7 +142,7 @@ extension OnkyoClient {
     }
 
     struct ResponseContext {
-        let resumed: UnsafeMutablePointer<Bool>
+        let resumed: ResumedFlag
         let continuation: CheckedContinuation<String, Error>
         let readNext: () -> Void
     }
