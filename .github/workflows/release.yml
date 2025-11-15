@@ -15,6 +15,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache Homebrew packages
+        uses: WarpBuilds/cache@v1
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /opt/homebrew/Cellar/xcodegen
+            /opt/homebrew/Cellar/just
+            /opt/homebrew/Cellar/create-dmg
+          key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/release.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-brew-
+
+      - name: Cache Swift PM dependencies
+        uses: WarpBuilds/cache@v1
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved', 'Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
       - name: Extract version from tag
         id: version
         run: |
