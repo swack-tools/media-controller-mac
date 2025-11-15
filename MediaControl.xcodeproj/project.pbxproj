@@ -8,11 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		0B93B2E66E66FA8D736157EC /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6534208F3298B55C0061404D /* main.swift */; };
+		0D9D589750888DE5C0D416E1 /* StatusBarController+ReceiverActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E59C0BC55054D340B3DD448 /* StatusBarController+ReceiverActions.swift */; };
 		116E5F0D305B2B194E3C1A83 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CA0D58F648AC4D79F3FB2B2 /* StatusBarController.swift */; };
+		1A91C51580546BA84A408A68 /* DPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66001E8D67CBC61FA9E63FBF /* DPadView.swift */; };
 		3EB8444EA1ADF3EEC8427EAA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6DD78A37F41466E383D76EA2 /* Assets.xcassets */; };
 		43D955176EAB3CD085DE3650 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F4253796325656BA19016CB /* NotificationManager.swift */; };
+		528DD7CA2726C5726D1316D7 /* StatusBarController+Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E044F7B0552E1CC2CA421D /* StatusBarController+Menu.swift */; };
+		531F0AAD169084806C0236AF /* StatusBarController+ShieldActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AAF2B1C25381260F56DBA2 /* StatusBarController+ShieldActions.swift */; };
 		5D53A46B2C68D40F26298053 /* OnkyoClient in Frameworks */ = {isa = PBXBuildFile; productRef = 132269237292C38E8C850958 /* OnkyoClient */; };
 		6303BEF6DC109033E48E93A1 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691E82C5546E16A7B1092D81 /* SettingsManager.swift */; };
+		63BCE8D5E1785A3AADB5F099 /* StatusBarController+Hotkeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFD9A05B02F8E998D7C0832B /* StatusBarController+Hotkeys.swift */; };
 		C37B813CC612037B948CEBEF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4CABD1A77202E5D2ABC7224 /* AppDelegate.swift */; };
 		E09D4C854C5DC999A5DCC0A6 /* ShieldClient in Frameworks */ = {isa = PBXBuildFile; productRef = D779D581B16D275C29F6C383 /* ShieldClient */; };
 /* End PBXBuildFile section */
@@ -20,13 +25,18 @@
 /* Begin PBXFileReference section */
 		0CA0D58F648AC4D79F3FB2B2 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 		6534208F3298B55C0061404D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		66001E8D67CBC61FA9E63FBF /* DPadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DPadView.swift; sourceTree = "<group>"; };
 		691E82C5546E16A7B1092D81 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		69AAF2B1C25381260F56DBA2 /* StatusBarController+ShieldActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StatusBarController+ShieldActions.swift"; sourceTree = "<group>"; };
 		6DD78A37F41466E383D76EA2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7E59C0BC55054D340B3DD448 /* StatusBarController+ReceiverActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StatusBarController+ReceiverActions.swift"; sourceTree = "<group>"; };
+		89E044F7B0552E1CC2CA421D /* StatusBarController+Menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StatusBarController+Menu.swift"; sourceTree = "<group>"; };
 		9ACE739D46064A763B536CE0 /* media-control */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "media-control"; path = .; sourceTree = SOURCE_ROOT; };
 		9F4253796325656BA19016CB /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		A4CABD1A77202E5D2ABC7224 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B390B6F6112B58F72897F29B /* MediaControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MediaControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA1A67EF97A7B782B22489EA /* Release.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
+		BFD9A05B02F8E998D7C0832B /* StatusBarController+Hotkeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StatusBarController+Hotkeys.swift"; sourceTree = "<group>"; };
 		E9E4FE5FF7DF0AC3E8D465FD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -65,12 +75,17 @@
 			children = (
 				A4CABD1A77202E5D2ABC7224 /* AppDelegate.swift */,
 				6DD78A37F41466E383D76EA2 /* Assets.xcassets */,
+				66001E8D67CBC61FA9E63FBF /* DPadView.swift */,
 				E9E4FE5FF7DF0AC3E8D465FD /* Info.plist */,
 				6534208F3298B55C0061404D /* main.swift */,
 				9F4253796325656BA19016CB /* NotificationManager.swift */,
 				BA1A67EF97A7B782B22489EA /* Release.entitlements */,
 				691E82C5546E16A7B1092D81 /* SettingsManager.swift */,
 				0CA0D58F648AC4D79F3FB2B2 /* StatusBarController.swift */,
+				BFD9A05B02F8E998D7C0832B /* StatusBarController+Hotkeys.swift */,
+				89E044F7B0552E1CC2CA421D /* StatusBarController+Menu.swift */,
+				7E59C0BC55054D340B3DD448 /* StatusBarController+ReceiverActions.swift */,
+				69AAF2B1C25381260F56DBA2 /* StatusBarController+ShieldActions.swift */,
 			);
 			path = MediaControlApp;
 			sourceTree = "<group>";
@@ -161,8 +176,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				C37B813CC612037B948CEBEF /* AppDelegate.swift in Sources */,
+				1A91C51580546BA84A408A68 /* DPadView.swift in Sources */,
 				43D955176EAB3CD085DE3650 /* NotificationManager.swift in Sources */,
 				6303BEF6DC109033E48E93A1 /* SettingsManager.swift in Sources */,
+				63BCE8D5E1785A3AADB5F099 /* StatusBarController+Hotkeys.swift in Sources */,
+				528DD7CA2726C5726D1316D7 /* StatusBarController+Menu.swift in Sources */,
+				0D9D589750888DE5C0D416E1 /* StatusBarController+ReceiverActions.swift in Sources */,
+				531F0AAD169084806C0236AF /* StatusBarController+ShieldActions.swift in Sources */,
 				116E5F0D305B2B194E3C1A83 /* StatusBarController.swift in Sources */,
 				0B93B2E66E66FA8D736157EC /* main.swift in Sources */,
 			);

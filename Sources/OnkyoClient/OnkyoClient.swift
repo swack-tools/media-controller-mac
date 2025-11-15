@@ -3,9 +3,9 @@ import Network
 
 /// Public API for controlling Onkyo/Integra AV Receivers via eISCP protocol
 public class OnkyoClient {
-    private let host: String
-    private static let defaultPort: UInt16 = 60128
-    private static let connectionTimeout: TimeInterval = 3.0
+    let host: String
+    static let defaultPort: UInt16 = 60128
+    static let connectionTimeout: TimeInterval = 3.0
 
     public init(host: String) {
         self.host = host
@@ -221,7 +221,6 @@ public class OnkyoClient {
         return lines.isEmpty ? ["Unknown"] : lines
     }
 
-
     /// Query current video information
     /// - Returns: Array of video information lines for display
     /// - Throws: OnkyoClientError if query fails
@@ -295,7 +294,6 @@ public class OnkyoClient {
         return lines.isEmpty ? [rawInfo] : lines
     }
 
-
     /// Query current mute state
     /// - Returns: True if muted, false otherwise
     /// - Throws: OnkyoClientError if query fails
@@ -314,108 +312,41 @@ public class OnkyoClient {
 
     // MARK: - Private Implementation
 
-    private func sendCommand(_ command: String, expectingPrefix: String) async throws -> String {
+    func sendCommand(_ command: String, expectingPrefix: String) async throws -> String {
         let packet = buildPacket(for: command)
 
         return try await withCheckedThrowingContinuation { continuation in
             var resumed = false
             let queue = DispatchQueue(label: "onkyo.\(UUID().uuidString)")
 
-            let connection = NWConnection(
-                host: NWEndpoint.Host(host),
-                port: NWEndpoint.Port(integerLiteral: Self.defaultPort),
-                using: .tcp
+            let connection = createConnection()
+
+            // Setup read response handler
+            let readHandler = createReadHandler(
+                connection: connection,
+                expectingPrefix: expectingPrefix,
+                resumed: &resumed,
+                continuation: continuation
             )
 
-            // Recursive read function - receiver may send multiple responses
-            // (e.g., album art data before volume response)
-            func readNextResponse() {
-                // Read eISCP header (16 bytes)
-                connection.receive(minimumIncompleteLength: 16, maximumLength: 16) { headerData, _, _, headerError in
-                    guard headerError == nil, let headerData = headerData, headerData.count == 16 else {
-                        if !resumed {
-                            resumed = true
-                            connection.cancel()
-                            continuation.resume(throwing: OnkyoClientError.connectionFailed("Header read failed"))
-                        }
-                        return
-                    }
-
-                    // Parse data size from header (bytes 8-11, big-endian UInt32)
-                    let dataSize = headerData[8..<12].withUnsafeBytes { $0.load(as: UInt32.self).bigEndian }
-
-                    // Read message data
-                    let dataLength = Int(dataSize)
-                    connection.receive(
-                        minimumIncompleteLength: dataLength,
-                        maximumLength: dataLength
-                    ) { messageData, _, _, messageError in
-                        guard messageError == nil, let messageData = messageData,
-                              let responseString = String(data: messageData, encoding: .utf8) else {
-                            if !resumed {
-                                resumed = true
-                                connection.cancel()
-                                continuation.resume(throwing: OnkyoClientError.invalidResponse)
-                            }
-                            return
-                        }
-
-                        // Check if this response contains the expected prefix
-                        if responseString.contains(expectingPrefix) {
-                            if !resumed {
-                                resumed = true
-                                connection.cancel()
-                                continuation.resume(returning: responseString)
-                            }
-                        } else {
-                            // Not the response we want - read next message
-                            readNextResponse()
-                        }
-                    }
-                }
-            }
-
-            connection.stateUpdateHandler = { state in
-                switch state {
-                case .ready:
-                    connection.send(content: packet, completion: .contentProcessed { error in
-                        if let error = error {
-                            if !resumed {
-                                resumed = true
-                                connection.cancel()
-                                let failureError = OnkyoClientError.connectionFailed(
-                                    error.localizedDescription
-                                )
-                                continuation.resume(throwing: failureError)
-                            }
-                        } else {
-                            readNextResponse()
-                        }
-                    })
-                case .failed(let error), .waiting(let error):
-                    if !resumed {
-                        resumed = true
-                        connection.cancel()
-                        let failureError = OnkyoClientError.connectionFailed(
-                            error.localizedDescription
-                        )
-                        continuation.resume(throwing: failureError)
-                    }
-                default:
-                    break
-                }
-            }
+            // Setup connection state handler
+            setupConnectionStateHandler(
+                connection: connection,
+                packet: packet,
+                resumed: &resumed,
+                continuation: continuation,
+                readHandler: readHandler
+            )
 
             connection.start(queue: queue)
 
-            // Timeout handler
-            queue.asyncAfter(deadline: .now() + Self.connectionTimeout) {
-                if !resumed {
-                    resumed = true
-                    connection.cancel()
-                    continuation.resume(throwing: OnkyoClientError.timeout)
-                }
-            }
+            // Setup timeout
+            setupTimeout(
+                queue: queue,
+                connection: connection,
+                resumed: &resumed,
+                continuation: continuation
+            )
         }
     }
 
