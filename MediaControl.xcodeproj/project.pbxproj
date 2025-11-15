@@ -26,6 +26,7 @@
 		9F4253796325656BA19016CB /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		A4CABD1A77202E5D2ABC7224 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B390B6F6112B58F72897F29B /* MediaControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MediaControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA1A67EF97A7B782B22489EA /* Release.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
 		E9E4FE5FF7DF0AC3E8D465FD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -67,6 +68,7 @@
 				E9E4FE5FF7DF0AC3E8D465FD /* Info.plist */,
 				6534208F3298B55C0061404D /* main.swift */,
 				9F4253796325656BA19016CB /* NotificationManager.swift */,
+				BA1A67EF97A7B782B22489EA /* Release.entitlements */,
 				691E82C5546E16A7B1092D81 /* SettingsManager.swift */,
 				0CA0D58F648AC4D79F3FB2B2 /* StatusBarController.swift */,
 			);
@@ -256,9 +258,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_ENTITLEMENTS = MediaControlApp/Release.entitlements;
+				CODE_SIGN_IDENTITY = "Developer ID Application: SWACKTECH, LLC (WHS8S6ZW43)";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WHS8S6ZW43;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = MediaControlApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -266,6 +271,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mediacontrol.app;
 				PRODUCT_NAME = MediaControl;
 				SDKROOT = macosx;

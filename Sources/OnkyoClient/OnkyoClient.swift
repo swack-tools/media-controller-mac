@@ -183,6 +183,12 @@ public class OnkyoClient {
         var details: [String] = []
 
         for part in parts {
+            // Skip HDMI port information as it's shown in Input field
+            // This includes "HDMI", "HDMI 1", "HDMI 2", etc.
+            if part.uppercased().hasPrefix("HDMI") {
+                continue
+            }
+
             // Parse resolution
             if part.contains("x") {
                 // Extract resolution like "1920x1080p" -> "1080p" or "3840x2160p" -> "4K"
@@ -200,9 +206,6 @@ public class OnkyoClient {
                         resolution = resString
                     }
                 }
-            } else if part.uppercased() == "HDMI" {
-                // Skip HDMI as it's redundant (shown in input)
-                continue
             } else if !part.isEmpty {
                 // Add other details (HDR, color space, frame rate, etc.)
                 details.append(part)
