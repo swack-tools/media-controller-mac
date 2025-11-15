@@ -29,9 +29,10 @@ targets:
         SWIFT_VERSION: "5.9"
       configs:
         Debug:
-          CODE_SIGN_IDENTITY: "-"
           CODE_SIGN_STYLE: Manual
-          ENABLE_HARDENED_RUNTIME: NO
+          CODE_SIGN_IDENTITY: "Apple Development"
+          DEVELOPMENT_TEAM: WHS8S6ZW43
+          ENABLE_HARDENED_RUNTIME: YES
         Release:
           CODE_SIGN_STYLE: Manual
           CODE_SIGN_IDENTITY: "Developer ID Application: SWACKTECH, LLC (WHS8S6ZW43)"
