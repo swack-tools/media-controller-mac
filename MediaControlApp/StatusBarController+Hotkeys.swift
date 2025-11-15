@@ -30,7 +30,7 @@ extension StatusBarController {
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
         CGEvent.tapEnable(tap: eventTap, enable: true)
 
-        NSLog("StatusBarController: Global hotkeys enabled (Command+F6, Command+F8, F10/F11/F12)")
+        NSLog("StatusBarController: Global hotkeys enabled (Command+;, Command+F8, F10/F11/F12)")
     }
 
     func handleMediaKey(
@@ -47,14 +47,14 @@ extension StatusBarController {
             return Unmanaged.passRetained(event)
         }
 
-        // Handle Command+F6 for Music Mode and Command+F8 for Shield TV play/pause
+        // Handle Command+; for Music Mode and Command+F8 for Shield TV play/pause
         if type == .keyDown {
             let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
             let flags = event.flags
 
-            // Check for Command modifier and F6 key (keycode 97)
-            if flags.contains(.maskCommand) && keyCode == 97 {
-                NSLog("StatusBarController: Command+F6 (Music Mode) detected")
+            // Check for Command modifier and semicolon key (keycode 41)
+            if flags.contains(.maskCommand) && keyCode == 41 {
+                NSLog("StatusBarController: Command+; (Music Mode) detected")
                 setMusicMode()
                 // Don't pass through to system - consume the event
                 return nil
