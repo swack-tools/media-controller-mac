@@ -48,6 +48,34 @@ extension StatusBarController {
         }
     }
 
+    @objc func shieldSkipNext() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.skipNext()
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
+    @objc func shieldSkipPrevious() {
+        Task {
+            do {
+                guard let client = settings.shieldClient else {
+                    NotificationManager.shared.showError(device: "Shield TV", message: "Not configured")
+                    return
+                }
+                try await client.skipPrevious()
+            } catch {
+                NotificationManager.shared.showError(device: "Shield TV", message: error.localizedDescription)
+            }
+        }
+    }
+
     @objc func dpadUpPressed() {
         Task {
             do {

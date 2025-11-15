@@ -56,6 +56,24 @@ public class ShieldClient {
         try await sendKeyCommand(keyCode: KeyCode.mediaPause.rawValue)
     }
 
+    /// Skip to next track/chapter on Shield TV
+    /// - Throws: ShieldClientError if not paired or command fails
+    public func skipNext() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.mediaNext.rawValue)
+    }
+
+    /// Skip to previous track/chapter on Shield TV
+    /// - Throws: ShieldClientError if not paired or command fails
+    public func skipPrevious() async throws {
+        guard isPaired else {
+            throw ShieldClientError.notPaired
+        }
+        try await sendKeyCommand(keyCode: KeyCode.mediaPrevious.rawValue)
+    }
+
     /// Wake up Shield TV (power on if sleeping)
     /// - Throws: ShieldClientError if not paired or command fails
     public func wakeUp() async throws {

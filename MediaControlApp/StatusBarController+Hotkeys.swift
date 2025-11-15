@@ -30,7 +30,7 @@ extension StatusBarController {
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
         CGEvent.tapEnable(tap: eventTap, enable: true)
 
-        NSLog("StatusBarController: Global hotkeys enabled (Command+;, Command+F8, F10/F11/F12)")
+        NSLog("StatusBarController: Global hotkeys enabled (Command+;, Command+F7/F8/F9, F10/F11/F12)")
     }
 
     func handleMediaKey(
@@ -47,7 +47,7 @@ extension StatusBarController {
             return Unmanaged.passRetained(event)
         }
 
-        // Handle Command+; for Music Mode and Command+F8 for Shield TV play/pause
+        // Handle Command+; for Music Mode and Command+F7/F8/F9 for Shield TV controls
         if type == .keyDown {
             let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
             let flags = event.flags
@@ -60,10 +60,26 @@ extension StatusBarController {
                 return nil
             }
 
+            // Check for Command modifier and F7 key (keycode 98)
+            if flags.contains(.maskCommand) && keyCode == 98 {
+                NSLog("StatusBarController: Command+F7 (Shield Previous) detected")
+                shieldSkipPrevious()
+                // Don't pass through to system - consume the event
+                return nil
+            }
+
             // Check for Command modifier and F8 key (keycode 100)
             if flags.contains(.maskCommand) && keyCode == 100 {
                 NSLog("StatusBarController: Command+F8 (Shield Play/Pause) detected")
                 shieldPlayPause()
+                // Don't pass through to system - consume the event
+                return nil
+            }
+
+            // Check for Command modifier and F9 key (keycode 101)
+            if flags.contains(.maskCommand) && keyCode == 101 {
+                NSLog("StatusBarController: Command+F9 (Shield Next) detected")
+                shieldSkipNext()
                 // Don't pass through to system - consume the event
                 return nil
             }
