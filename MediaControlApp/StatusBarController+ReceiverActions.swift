@@ -1,5 +1,6 @@
 import Cocoa
 import OnkyoClient
+import ShieldClient
 
 // MARK: - Receiver Actions
 
