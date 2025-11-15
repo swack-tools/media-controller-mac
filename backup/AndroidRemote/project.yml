@@ -1,0 +1,48 @@
+name: ShieldPause
+options:
+  bundleIdPrefix: com.emby
+  deploymentTarget:
+    macOS: "13.0"
+
+packages:
+  ArgumentParser:
+    url: https://github.com/apple/swift-argument-parser
+    from: 1.3.0
+
+targets:
+  ShieldPauseCore:
+    type: framework
+    platform: macOS
+    sources:
+      - path: Sources/ShieldPause
+        excludes:
+          - main.swift
+    dependencies:
+      - package: ArgumentParser
+        product: ArgumentParser
+    settings:
+      SWIFT_VERSION: "5.9"
+      MACOSX_DEPLOYMENT_TARGET: "13.0"
+
+  ShieldPause:
+    type: tool
+    platform: macOS
+    sources:
+      - Sources/ShieldPause/main.swift
+    dependencies:
+      - target: ShieldPauseCore
+    settings:
+      PRODUCT_NAME: shield-pause
+      SWIFT_VERSION: "5.9"
+      MACOSX_DEPLOYMENT_TARGET: "13.0"
+
+  ShieldPauseTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/ShieldPauseTests
+    dependencies:
+      - target: ShieldPauseCore
+    settings:
+      SWIFT_VERSION: "5.9"
+      MACOSX_DEPLOYMENT_TARGET: "13.0"

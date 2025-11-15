@@ -1,0 +1,591 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0C617FFDCB8A4C4E53EEAFE9 /* CommandLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AF640064F0DD438CF93467E /* CommandLine.swift */; };
+		1897E07E2248482420CA1087 /* BasicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0949651B6BAD6AC2672E2DE0 /* BasicTests.swift */; };
+		420AE6BF2A0CC22FFD36753B /* ValidatorsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29874D8A1C71DBC9B582A4C0 /* ValidatorsTests.swift */; };
+		52F80DC3066D069F2B08CB6E /* ConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9594D7C595F8D88DD27AC556 /* ConfigurationTests.swift */; };
+		55C79288F538CD06645E2451 /* AndroidTVRemoteControl in Frameworks */ = {isa = PBXBuildFile; productRef = 1AB34B5E499727F80BA30C04 /* AndroidTVRemoteControl */; };
+		5CF0D74551E18F59AA3338DA /* ShieldPauseCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A61473C0F7AE3E22CD96145D /* ShieldPauseCore.framework */; };
+		8A409854BF880AAF4560852F /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED3D2A4F34686C799F38B1B /* Configuration.swift */; };
+		A52ADE12E037B2F19BC20B7D /* ShieldPauseCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A61473C0F7AE3E22CD96145D /* ShieldPauseCore.framework */; };
+		A9976812456FB94960366C2D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA2F5C91B39C6EEBC443E6E6 /* main.swift */; };
+		C78D9135795676BB36C885F9 /* ShieldRemote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B5376242073A989A50B74BA /* ShieldRemote.swift */; };
+		CED14FC5CA25106DC2463EA4 /* Validators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5925EFDE66B12055E0D4B26 /* Validators.swift */; };
+		E8331F2B169787D9BC2D1C2D /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = AD4A011CF831A40524EF2725 /* ArgumentParser */; };
+		FC0BC26ECFC69518361A7C1D /* ShieldPauseCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A61473C0F7AE3E22CD96145D /* ShieldPauseCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B253718160FC7C82E480AE8B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5DB6823C5339930D9ED36B3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0DBCA958CE0F9EAB6054CF8D;
+			remoteInfo = ShieldPauseCore;
+		};
+		E8E14E7CA9955A90937A54B1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5DB6823C5339930D9ED36B3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0DBCA958CE0F9EAB6054CF8D;
+			remoteInfo = ShieldPauseCore;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9F1825046E0B8554C02B8D17 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FC0BC26ECFC69518361A7C1D /* ShieldPauseCore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0949651B6BAD6AC2672E2DE0 /* BasicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicTests.swift; sourceTree = "<group>"; };
+		0B5376242073A989A50B74BA /* ShieldRemote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldRemote.swift; sourceTree = "<group>"; };
+		293F948BE10F54289E8BAFD9 /* ShieldPause */ = {isa = PBXFileReference; includeInIndex = 0; path = ShieldPause; sourceTree = BUILT_PRODUCTS_DIR; };
+		29874D8A1C71DBC9B582A4C0 /* ValidatorsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidatorsTests.swift; sourceTree = "<group>"; };
+		9594D7C595F8D88DD27AC556 /* ConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationTests.swift; sourceTree = "<group>"; };
+		9AF640064F0DD438CF93467E /* CommandLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLine.swift; sourceTree = "<group>"; };
+		A61473C0F7AE3E22CD96145D /* ShieldPauseCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ShieldPauseCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CA2F5C91B39C6EEBC443E6E6 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		D387FAD81A9F3FFFC6ED3345 /* ShieldPauseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ShieldPauseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5925EFDE66B12055E0D4B26 /* Validators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Validators.swift; sourceTree = "<group>"; };
+		DED3D2A4F34686C799F38B1B /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1D23C141AD8B1BAC52116CEB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5CF0D74551E18F59AA3338DA /* ShieldPauseCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5BD7BADADD2A2314C64B1360 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A52ADE12E037B2F19BC20B7D /* ShieldPauseCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		89E6A5C7B60555F64B5D60D2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				55C79288F538CD06645E2451 /* AndroidTVRemoteControl in Frameworks */,
+				E8331F2B169787D9BC2D1C2D /* ArgumentParser in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		510488F2892F59DD29F72AE1 = {
+			isa = PBXGroup;
+			children = (
+				CB0D01105B9E54638182599E /* ShieldPause */,
+				7091695572E637EF996CCD3D /* ShieldPauseTests */,
+				A8D24273324779982BD6775E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7091695572E637EF996CCD3D /* ShieldPauseTests */ = {
+			isa = PBXGroup;
+			children = (
+				0949651B6BAD6AC2672E2DE0 /* BasicTests.swift */,
+				9594D7C595F8D88DD27AC556 /* ConfigurationTests.swift */,
+				29874D8A1C71DBC9B582A4C0 /* ValidatorsTests.swift */,
+			);
+			name = ShieldPauseTests;
+			path = Tests/ShieldPauseTests;
+			sourceTree = "<group>";
+		};
+		A8D24273324779982BD6775E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				293F948BE10F54289E8BAFD9 /* ShieldPause */,
+				A61473C0F7AE3E22CD96145D /* ShieldPauseCore.framework */,
+				D387FAD81A9F3FFFC6ED3345 /* ShieldPauseTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CB0D01105B9E54638182599E /* ShieldPause */ = {
+			isa = PBXGroup;
+			children = (
+				9AF640064F0DD438CF93467E /* CommandLine.swift */,
+				DED3D2A4F34686C799F38B1B /* Configuration.swift */,
+				CA2F5C91B39C6EEBC443E6E6 /* main.swift */,
+				0B5376242073A989A50B74BA /* ShieldRemote.swift */,
+				D5925EFDE66B12055E0D4B26 /* Validators.swift */,
+			);
+			name = ShieldPause;
+			path = Sources/ShieldPause;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0DBCA958CE0F9EAB6054CF8D /* ShieldPauseCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1405ACE8FBAC8C34329A23FB /* Build configuration list for PBXNativeTarget "ShieldPauseCore" */;
+			buildPhases = (
+				3490638EB639B2B599742CAC /* Sources */,
+				89E6A5C7B60555F64B5D60D2 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShieldPauseCore;
+			packageProductDependencies = (
+				1AB34B5E499727F80BA30C04 /* AndroidTVRemoteControl */,
+				AD4A011CF831A40524EF2725 /* ArgumentParser */,
+			);
+			productName = ShieldPauseCore;
+			productReference = A61473C0F7AE3E22CD96145D /* ShieldPauseCore.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		19AEC6C1BC9266342E2D1847 /* ShieldPause */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2385551FE25536185B8923E9 /* Build configuration list for PBXNativeTarget "ShieldPause" */;
+			buildPhases = (
+				1F487BE89203180B7580F8ED /* Sources */,
+				5BD7BADADD2A2314C64B1360 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				048DE85B7B35E5ED465AA08C /* PBXTargetDependency */,
+			);
+			name = ShieldPause;
+			packageProductDependencies = (
+			);
+			productName = ShieldPause;
+			productReference = 293F948BE10F54289E8BAFD9 /* ShieldPause */;
+			productType = "com.apple.product-type.tool";
+		};
+		C604934F5F1A4AFCFA3433E8 /* ShieldPauseTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8DEDC1A548EB2EF364E2BE8E /* Build configuration list for PBXNativeTarget "ShieldPauseTests" */;
+			buildPhases = (
+				CC8BFD4A090AE09E059DA777 /* Sources */,
+				1D23C141AD8B1BAC52116CEB /* Frameworks */,
+				9F1825046E0B8554C02B8D17 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6AE2884BF53257D8BE359216 /* PBXTargetDependency */,
+			);
+			name = ShieldPauseTests;
+			packageProductDependencies = (
+			);
+			productName = ShieldPauseTests;
+			productReference = D387FAD81A9F3FFFC6ED3345 /* ShieldPauseTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F5DB6823C5339930D9ED36B3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+			};
+			buildConfigurationList = 0EC01B61095A07559D157636 /* Build configuration list for PBXProject "ShieldPause" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 510488F2892F59DD29F72AE1;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				56AD8A6A530F459F1FEE9200 /* XCRemoteSwiftPackageReference "AndroidTVRemoteControl" */,
+				7351E5E7FA0D8BC217A625CF /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
+			);
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				19AEC6C1BC9266342E2D1847 /* ShieldPause */,
+				0DBCA958CE0F9EAB6054CF8D /* ShieldPauseCore */,
+				C604934F5F1A4AFCFA3433E8 /* ShieldPauseTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1F487BE89203180B7580F8ED /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A9976812456FB94960366C2D /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3490638EB639B2B599742CAC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0C617FFDCB8A4C4E53EEAFE9 /* CommandLine.swift in Sources */,
+				8A409854BF880AAF4560852F /* Configuration.swift in Sources */,
+				C78D9135795676BB36C885F9 /* ShieldRemote.swift in Sources */,
+				CED14FC5CA25106DC2463EA4 /* Validators.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC8BFD4A090AE09E059DA777 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1897E07E2248482420CA1087 /* BasicTests.swift in Sources */,
+				52F80DC3066D069F2B08CB6E /* ConfigurationTests.swift in Sources */,
+				420AE6BF2A0CC22FFD36753B /* ValidatorsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		048DE85B7B35E5ED465AA08C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0DBCA958CE0F9EAB6054CF8D /* ShieldPauseCore */;
+			targetProxy = B253718160FC7C82E480AE8B /* PBXContainerItemProxy */;
+		};
+		6AE2884BF53257D8BE359216 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0DBCA958CE0F9EAB6054CF8D /* ShieldPauseCore */;
+			targetProxy = E8E14E7CA9955A90937A54B1 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		12671CE308B048BCA79F101A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.emby.ShieldPauseCore;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.9;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		33BC759B5F9017DD128E0D90 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.emby.ShieldPause;
+				PRODUCT_NAME = "shield-pause";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		53D55BBE395522B351E6B99D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		58DA0C8E44C02AC7E5EF4A79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.emby.ShieldPause;
+				PRODUCT_NAME = "shield-pause";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		9ECB96DD2790FC4DA5CE7232 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A579FD45C882E23DC23F3501 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.emby.ShieldPauseCore;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.9;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		A9292B49D214A5F982D98DCB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.emby.ShieldPauseTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		BCEEE2199F80881EEA775474 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.emby.ShieldPauseTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0EC01B61095A07559D157636 /* Build configuration list for PBXProject "ShieldPause" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9ECB96DD2790FC4DA5CE7232 /* Debug */,
+				53D55BBE395522B351E6B99D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1405ACE8FBAC8C34329A23FB /* Build configuration list for PBXNativeTarget "ShieldPauseCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12671CE308B048BCA79F101A /* Debug */,
+				A579FD45C882E23DC23F3501 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		2385551FE25536185B8923E9 /* Build configuration list for PBXNativeTarget "ShieldPause" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				58DA0C8E44C02AC7E5EF4A79 /* Debug */,
+				33BC759B5F9017DD128E0D90 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8DEDC1A548EB2EF364E2BE8E /* Build configuration list for PBXNativeTarget "ShieldPauseTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BCEEE2199F80881EEA775474 /* Debug */,
+				A9292B49D214A5F982D98DCB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		56AD8A6A530F459F1FEE9200 /* XCRemoteSwiftPackageReference "AndroidTVRemoteControl" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/odyshewroman/AndroidTVRemoteControl";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		7351E5E7FA0D8BC217A625CF /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-argument-parser";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1AB34B5E499727F80BA30C04 /* AndroidTVRemoteControl */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56AD8A6A530F459F1FEE9200 /* XCRemoteSwiftPackageReference "AndroidTVRemoteControl" */;
+			productName = AndroidTVRemoteControl;
+		};
+		AD4A011CF831A40524EF2725 /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7351E5E7FA0D8BC217A625CF /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = F5DB6823C5339930D9ED36B3 /* Project object */;
+}

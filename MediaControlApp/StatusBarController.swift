@@ -10,6 +10,7 @@ class StatusBarController: NSObject {
     private var volumeSlider: NSSlider!
     private var volumeLabel: NSMenuItem!
     private var inputSourceLabel: NSMenuItem!
+    private var audioInfoLabels: [NSMenuItem] = []
     private var videoInfoLabels: [NSMenuItem] = []
     private var listeningModeLabel: NSMenuItem!
     private var muteItem: NSMenuItem!
@@ -991,6 +992,9 @@ extension StatusBarController: NSMenuDelegate {
             await updateInputSourceDisplayAsync()
             try? await Task.sleep(nanoseconds: 200_000_000)
 
+            await updateAudioInfoDisplayAsync()
+            try? await Task.sleep(nanoseconds: 200_000_000)
+
             await updateVideoInfoDisplayAsync()
             try? await Task.sleep(nanoseconds: 200_000_000)
 
@@ -1046,7 +1050,76 @@ extension StatusBarController: NSMenuDelegate {
         }
     }
 
-    /// Async version of updateVideoInfoDisplay for sequential execution
+    /// Async version of updateAudioInfoDisplay for sequential execution
+    private func updateAudioInfoDisplayAsync() async {
+        do {
+            guard let client = settings.onkyoClient else {
+                await MainActor.run {
+                    // Clear existing audio info labels
+                    for label in self.audioInfoLabels {
+                        self.menu.removeItem(label)
+                    }
+                    self.audioInfoLabels.removeAll()
+
+                    // Add placeholder
+                    guard let inputIndex = self.menu.items.firstIndex(of: self.inputSourceLabel) else {
+                        return
+                    }
+                    let label = NSMenuItem(title: "Audio: --", action: nil, keyEquivalent: "")
+                    label.isEnabled = false
+                    self.menu.insertItem(label, at: inputIndex + 1)
+                    self.audioInfoLabels.append(label)
+                }
+                return
+            }
+            let audioInfoLines = try await retryQuery {
+                try await client.getAudioInformation()
+            }
+            await MainActor.run {
+                // Clear existing audio info labels
+                for label in self.audioInfoLabels {
+                    self.menu.removeItem(label)
+                }
+                self.audioInfoLabels.removeAll()
+
+                // Find insertion index (after input source label)
+                guard let inputIndex = self.menu.items.firstIndex(of: self.inputSourceLabel) else {
+                    return
+                }
+                let insertIndex = inputIndex + 1
+
+                // Add new audio info labels
+                for (index, line) in audioInfoLines.enumerated() {
+                    let label = NSMenuItem(
+                        title: index == 0 ? "Audio: \(line)" : "  \(line)",
+                        action: nil,
+                        keyEquivalent: ""
+                    )
+                    label.isEnabled = false
+                    self.menu.insertItem(label, at: insertIndex + index)
+                    self.audioInfoLabels.append(label)
+                }
+            }
+        } catch {
+            await MainActor.run {
+                // Clear existing audio info labels
+                for label in self.audioInfoLabels {
+                    self.menu.removeItem(label)
+                }
+                self.audioInfoLabels.removeAll()
+
+                // Add error placeholder
+                guard let inputIndex = self.menu.items.firstIndex(of: self.inputSourceLabel) else {
+                    return
+                }
+                let label = NSMenuItem(title: "Audio: --", action: nil, keyEquivalent: "")
+                label.isEnabled = false
+                self.menu.insertItem(label, at: inputIndex + 1)
+                self.audioInfoLabels.append(label)
+            }
+        }
+    }
+
     private func updateVideoInfoDisplayAsync() async {
         do {
             guard let client = settings.onkyoClient else {
@@ -1064,11 +1137,11 @@ extension StatusBarController: NSMenuDelegate {
                 }
                 self.videoInfoLabels.removeAll()
 
-                // Find insertion index (after input source label)
+                // Find insertion index (after input source label and audio info labels)
                 guard let inputIndex = self.menu.items.firstIndex(of: self.inputSourceLabel) else {
                     return
                 }
-                let insertIndex = inputIndex + 1
+                let insertIndex = inputIndex + 1 + self.audioInfoLabels.count
 
                 // Add new video info labels
                 for (index, line) in videoInfoLines.enumerated() {
@@ -1090,14 +1163,15 @@ extension StatusBarController: NSMenuDelegate {
                 }
                 self.videoInfoLabels.removeAll()
 
-                // Find insertion index
+                // Find insertion index (after input source label and audio info labels)
                 guard let inputIndex = self.menu.items.firstIndex(of: self.inputSourceLabel) else {
                     return
                 }
+                let insertIndex = inputIndex + 1 + self.audioInfoLabels.count
 
                 let label = NSMenuItem(title: "Video: --", action: nil, keyEquivalent: "")
                 label.isEnabled = false
-                self.menu.insertItem(label, at: inputIndex + 1)
+                self.menu.insertItem(label, at: insertIndex)
                 self.videoInfoLabels.append(label)
             }
         }

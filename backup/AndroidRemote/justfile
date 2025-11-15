@@ -1,0 +1,252 @@
+# Shield Pause CLI - Justfile
+# Swift project automation tasks
+
+# Default recipe to display help
+default:
+    @just --list
+
+# Variables
+build_dir := ".build"
+release_dir := build_dir / "release"
+debug_dir := build_dir / "debug"
+binary_name := "ShieldPause"
+install_path := "/usr/local/bin/shield-pause"
+
+# Build the project in debug mode
+build:
+    @echo "Building in debug mode..."
+    swift build
+
+# Build the project in release mode
+build-release:
+    @echo "Building in release mode..."
+    swift build -c release
+
+# Build for production with optimizations
+build-prod: build-release
+    @echo "✅ Production build complete: {{release_dir}}/{{binary_name}}"
+
+# Run the application in debug mode
+run *args:
+    @echo "Running {{binary_name}} (debug)..."
+    swift run {{binary_name}} {{args}}
+
+# Run the application in release mode
+run-release *args: build-release
+    @echo "Running {{binary_name}} (release)..."
+    {{release_dir}}/{{binary_name}} {{args}}
+
+# Run tests (when implemented)
+test:
+    @echo "Running tests..."
+    swift test
+
+# Run tests with verbose output
+test-verbose:
+    @echo "Running tests (verbose)..."
+    swift test --verbose
+
+# Clean build artifacts
+clean:
+    @echo "Cleaning build artifacts..."
+    rm -rf {{build_dir}}
+    rm -rf .swiftpm
+    @echo "✅ Clean complete"
+
+# Deep clean (including Xcode project and dependencies)
+clean-all: clean
+    @echo "Deep cleaning..."
+    rm -rf *.xcodeproj
+    rm -rf .build
+    rm -rf Package.resolved
+    @echo "✅ Deep clean complete"
+
+# Generate Xcode project using XcodeGen
+xcode:
+    @echo "Generating Xcode project..."
+    xcodegen generate
+    @echo "✅ Xcode project generated: ShieldPause.xcodeproj"
+
+# Open project in Xcode
+open: xcode
+    @echo "Opening in Xcode..."
+    open ShieldPause.xcodeproj
+
+# Install the binary to system path
+install: build-release
+    @echo "Installing {{binary_name}} to {{install_path}}..."
+    sudo cp {{release_dir}}/{{binary_name}} {{install_path}}
+    sudo chmod +x {{install_path}}
+    @echo "✅ Installed to {{install_path}}"
+    @echo "Run with: shield-pause"
+
+# Uninstall the binary from system path
+uninstall:
+    @echo "Uninstalling {{binary_name}} from {{install_path}}..."
+    sudo rm -f {{install_path}}
+    @echo "✅ Uninstalled"
+
+# Update dependencies
+update:
+    @echo "Updating dependencies..."
+    swift package update
+    @echo "✅ Dependencies updated"
+
+# Resolve dependencies
+resolve:
+    @echo "Resolving dependencies..."
+    swift package resolve
+    @echo "✅ Dependencies resolved"
+
+# Show dependency graph
+deps:
+    @echo "Dependency tree:"
+    swift package show-dependencies
+
+# Format code using swift-format (if installed)
+format:
+    @echo "Formatting Swift code..."
+    @if command -v swift-format >/dev/null 2>&1; then \
+        find Sources -name "*.swift" -exec swift-format -i {} \; ; \
+        echo "✅ Code formatted"; \
+    else \
+        echo "⚠️  swift-format not installed. Install with: brew install swift-format"; \
+    fi
+
+# Lint code using SwiftLint (if installed)
+lint:
+    @echo "Linting Swift code..."
+    @if command -v swiftlint >/dev/null 2>&1; then \
+        swiftlint; \
+    else \
+        echo "⚠️  SwiftLint not installed. Install with: brew install swiftlint"; \
+    fi
+
+# Check code formatting
+check-format:
+    @echo "Checking code format..."
+    @if command -v swift-format >/dev/null 2>&1; then \
+        find Sources -name "*.swift" -exec swift-format lint {} \; ; \
+    else \
+        echo "⚠️  swift-format not installed. Install with: brew install swift-format"; \
+    fi
+
+# Build and run with specific host
+run-host host: build
+    @echo "Running with host {{host}}..."
+    swift run {{binary_name}} --host {{host}}
+
+# Force re-pairing
+run-repair: build
+    @echo "Running with --repair flag..."
+    swift run {{binary_name}} --repair
+
+# Build for release and show binary info
+info: build-release
+    @echo "Binary information:"
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    @file {{release_dir}}/{{binary_name}}
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    @ls -lh {{release_dir}}/{{binary_name}}
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Run the Python version for comparison
+python *args:
+    @echo "Running Python version..."
+    ./pause.py {{args}}
+
+# Show project status
+status:
+    @echo "Shield Pause CLI - Project Status"
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    @echo "Swift version: $(swift --version | head -n 1)"
+    @echo "Build directory: {{build_dir}}"
+    @if [ -d "{{release_dir}}" ]; then \
+        echo "Release build: ✅ ($(ls -lh {{release_dir}}/{{binary_name}} 2>/dev/null | awk '{print $5}'))"; \
+    else \
+        echo "Release build: ❌ (not built)"; \
+    fi
+    @if [ -d "{{debug_dir}}" ]; then \
+        echo "Debug build: ✅"; \
+    else \
+        echo "Debug build: ❌ (not built)"; \
+    fi
+    @if [ -f "{{install_path}}" ]; then \
+        echo "Installed: ✅ ({{install_path}})"; \
+    else \
+        echo "Installed: ❌"; \
+    fi
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Quick development cycle: clean, build, run
+dev *args: clean build
+    swift run {{binary_name}} {{args}}
+
+# Full CI check: clean, build, test, lint
+ci: clean build test lint
+    @echo "✅ CI checks passed"
+
+# Create a distributable package
+package: build-release
+    @echo "Creating distribution package..."
+    @mkdir -p dist
+    @cp {{release_dir}}/{{binary_name}} dist/shield-pause
+    @cp README_SWIFT.md dist/README.md
+    @echo "#!/bin/bash" > dist/install.sh
+    @echo "cp shield-pause /usr/local/bin/shield-pause" >> dist/install.sh
+    @echo "chmod +x /usr/local/bin/shield-pause" >> dist/install.sh
+    @chmod +x dist/install.sh
+    @echo "✅ Package created in dist/"
+    @ls -lh dist/
+
+# Generate and show help for the CLI
+help: build
+    swift run {{binary_name}} --help
+
+# Check for library compilation issues
+check:
+    @echo "Checking for compilation issues..."
+    @swift build 2>&1 | grep -i "error" || echo "✅ No errors found"
+
+# Watch for file changes and rebuild (requires fswatch)
+watch:
+    @echo "Watching for changes..."
+    @if command -v fswatch >/dev/null 2>&1; then \
+        fswatch -o Sources/ | xargs -n1 -I{} just build; \
+    else \
+        echo "⚠️  fswatch not installed. Install with: brew install fswatch"; \
+    fi
+
+# Benchmark build times
+benchmark:
+    @echo "Benchmarking build performance..."
+    @echo "Clean build (debug):"
+    @just clean > /dev/null 2>&1
+    @time swift build 2>&1 | tail -n 3
+    @echo ""
+    @echo "Incremental build (debug):"
+    @time swift build 2>&1 | tail -n 3
+    @echo ""
+    @echo "Clean build (release):"
+    @just clean > /dev/null 2>&1
+    @time swift build -c release 2>&1 | tail -n 3
+
+# Generate code coverage report (requires tests)
+coverage:
+    @echo "Generating code coverage..."
+    swift test --enable-code-coverage
+    @echo "Coverage data: {{build_dir}}/debug/codecov"
+
+# Archive the project (without build artifacts)
+archive:
+    @echo "Creating project archive..."
+    @tar -czf shield-pause-swift.tar.gz \
+        --exclude={{build_dir}} \
+        --exclude=.swiftpm \
+        --exclude=*.xcodeproj \
+        --exclude=.DS_Store \
+        --exclude=.env \
+        --exclude=*.pem \
+        Sources/ Package.swift project.yml justfile README*.md .gitignore
+    @echo "✅ Archive created: shield-pause-swift.tar.gz"
+    @ls -lh shield-pause-swift.tar.gz

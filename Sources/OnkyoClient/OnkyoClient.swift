@@ -147,6 +147,90 @@ public class OnkyoClient {
         throw OnkyoClientError.invalidResponse
     }
 
+    /// Query current audio information
+    /// - Returns: Array of audio information lines for display
+    /// - Throws: OnkyoClientError if query fails
+    public func getAudioInformation() async throws -> [String] {
+        let response = try await sendCommand("IFAQSTN", expectingPrefix: "IFA")
+
+        // Parse IFA response - format:
+        // "!1IFA{input},{format},{sample rate},{channels},{listening mode},...\u{1A}\r\n"
+        // Example: "!1IFAHDMI 3,PCM,48 kHz,2.0 ch,All Ch Stereo,5.0.2 ch,\u{1A}\r\n"
+        let cleaned = response.replacingOccurrences(of: "!1", with: "")
+            .replacingOccurrences(of: "\r", with: "")
+            .replacingOccurrences(of: "\n", with: "")
+            .replacingOccurrences(of: "\u{1A}", with: "")
+            .trimmingCharacters(in: .whitespaces)
+
+        if cleaned.hasPrefix("IFA") {
+            let infoString = String(cleaned.dropFirst(3))
+            let components = infoString.components(separatedBy: ",")
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+                .filter { !$0.isEmpty }
+
+            if components.isEmpty {
+                return ["No Signal"]
+            }
+            return parseAudioInfo(components)
+        }
+        throw OnkyoClientError.invalidResponse
+    }
+
+    /// Parse audio information into display lines
+    /// - Parameter components: Array of audio info components from receiver
+    /// - Returns: Array of formatted lines for display
+    private func parseAudioInfo(_ components: [String]) -> [String] {
+        // Components:
+        // [0] Input source (e.g., "HDMI 3") - skip, shown in Input field
+        // [1] Format (e.g., "PCM", "DTS")
+        // [2] Sample rate (e.g., "48 kHz")
+        // [3] Channels (e.g., "2.0 ch")
+        // [4] Listening mode (e.g., "All Ch Stereo") - skip, shown in Mode field
+        // [5+] Additional info (e.g., speaker config)
+
+        var lines: [String] = []
+        var details: [String] = []
+
+        // Skip index 0 (input source) - shown in Input field
+        // Skip index 4 (listening mode) - shown in Mode field
+        // Collect format, sample rate, channels
+        if components.count > 1 {
+            details.append(components[1]) // Format (PCM, DTS, etc.)
+        }
+        if components.count > 2 {
+            details.append(components[2]) // Sample rate (48 kHz, etc.)
+        }
+        if components.count > 3 {
+            details.append(components[3]) // Channels (2.0 ch, etc.)
+        }
+
+        // Build line with format, sample rate, channels
+        if !details.isEmpty {
+            let firstLine = details.joined(separator: " ")
+            if firstLine.count > 30 {
+                // Split into multiple parts if too long
+                var currentLine = ""
+                for detail in details {
+                    if currentLine.isEmpty {
+                        currentLine = detail
+                    } else if (currentLine + " " + detail).count <= 30 {
+                        currentLine += " " + detail
+                    } else {
+                        lines.append(currentLine)
+                        currentLine = detail
+                    }
+                }
+                if !currentLine.isEmpty {
+                    lines.append(currentLine)
+                }
+            } else {
+                lines.append(firstLine)
+            }
+        }
+
+        return lines.isEmpty ? ["Unknown"] : lines
+    }
+
     /// Query current video information
     /// - Returns: Array of video information lines for display
     /// - Throws: OnkyoClientError if query fails
