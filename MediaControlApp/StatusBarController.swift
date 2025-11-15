@@ -642,6 +642,29 @@ class StatusBarController: NSObject {
         }
     }
 
+    /// Retry a receiver query with exponential backoff
+    /// - Parameters:
+    ///   - maxAttempts: Maximum number of attempts (default 3)
+    ///   - operation: The async operation to retry
+    /// - Returns: Result of the operation
+    private func retryQuery<T>(maxAttempts: Int = 3, operation: @escaping () async throws -> T) async throws -> T {
+        var lastError: Error?
+
+        for attempt in 1...maxAttempts {
+            do {
+                return try await operation()
+            } catch {
+                lastError = error
+                if attempt < maxAttempts {
+                    // Wait with exponential backoff: 100ms, 200ms, 400ms
+                    try? await Task.sleep(nanoseconds: UInt64(100_000_000 * (1 << (attempt - 1))))
+                }
+            }
+        }
+
+        throw lastError ?? NSError(domain: "RetryFailed", code: -1)
+    }
+
     private func updateVolumeDisplay() {
         Task {
             do {
@@ -650,7 +673,9 @@ class StatusBarController: NSObject {
                     volumeSlider.doubleValue = 50
                     return
                 }
-                let volume = try await client.getVolume()
+                let volume = try await retryQuery {
+                    try await client.getVolume()
+                }
                 DispatchQueue.main.async {
                     self.volumeLabel.title = "Volume: \(volume)"
                     self.volumeSlider.doubleValue = Double(volume)
@@ -671,7 +696,9 @@ class StatusBarController: NSObject {
                     inputSourceLabel.title = "Input: --"
                     return
                 }
-                let inputSource = try await client.getInputSource()
+                let inputSource = try await retryQuery {
+                    try await client.getInputSource()
+                }
                 DispatchQueue.main.async {
                     self.inputSourceLabel.title = "Input: \(inputSource)"
                 }
@@ -691,7 +718,9 @@ class StatusBarController: NSObject {
                     await addVideoInfoLabel("Video: --")
                     return
                 }
-                let videoInfoLines = try await client.getVideoInformation()
+                let videoInfoLines = try await retryQuery {
+                    try await client.getVideoInformation()
+                }
                 DispatchQueue.main.async {
                     // Clear existing video info labels
                     for label in self.videoInfoLabels {
@@ -767,7 +796,9 @@ class StatusBarController: NSObject {
                     listeningModeLabel.title = "Mode: --"
                     return
                 }
-                let listeningMode = try await client.getListeningMode()
+                let listeningMode = try await retryQuery {
+                    try await client.getListeningMode()
+                }
                 DispatchQueue.main.async {
                     self.listeningModeLabel.title = "Mode: \(listeningMode)"
                 }
